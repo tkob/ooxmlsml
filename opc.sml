@@ -1,4 +1,4 @@
-structure IRI = struct
+structure PartIRI = struct
   type segment = string
   type iri = segment list
 
@@ -147,7 +147,7 @@ structure Opc = struct
   type part = {
     stream : Word8Vector.vector,
     (* [M1.1] *)
-    name : IRI.iri,
+    name : PartIRI.iri,
     (* [M1.2] *)
     contentType : ContentType.t }
 end

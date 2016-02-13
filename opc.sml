@@ -143,7 +143,8 @@ structure ContentType = struct
 end
 
 structure Opc = struct
-  (* 9.1 Parts *)
+  (* 9.1 Parts
+   * A part is a stream of bytes with properties *)
   type part = {
     stream : Word8Vector.vector,
     (* [M1.1] *)

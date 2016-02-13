@@ -152,3 +152,43 @@ structure Opc = struct
     (* [M1.2] *)
     contentType : ContentType.t }
 end
+
+structure Relationship = struct
+  datatype targetmode = Internal | External
+  type uri = string
+  type relationship = {
+    targetMode : targetmode option,
+    target : uri,
+    typ : string,
+    id : string }
+
+  fun fromReader input1 instream : relationship list =
+        let
+          open UXML.Path
+          infix |>
+          val doc = UXML.Path.fromDocument (UXML.parseDocument input1 instream)
+          val ns =
+                "http://schemas.openxmlformats.org/package/2006/relationships"
+          fun toRelationship node =
+                let
+                  fun stringToTargetMode "Internal" = Internal
+                    | stringToTargetMode "External" = External
+                    | stringToTargetMode s =
+                        raise Fail ("Invalid TargetMode: " ^ s)
+                  val targetMode = node |> getAttr "TargetMode"
+                                        |> Option.map stringToTargetMode
+                  val target = node |> getAttr "Target" |> Option.valOf
+                  val typ = node |> getAttr "Type" |> Option.valOf
+                  val id = node |> getAttr "Id" |> Option.valOf
+                in
+                  { targetMode = targetMode,
+                    target = target,
+                    typ = typ,
+                    id = id }
+                end
+        in
+          doc |> childNS (ns, "Relationships")
+              |> childNS (ns, "Relationship")
+              |> map toRelationship
+        end
+end

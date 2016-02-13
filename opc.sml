@@ -256,17 +256,18 @@ structure ContentTypeStream = struct
                   case List.find matchPartName overrides of
                        SOME override => SOME (#contentType override)
                      | NONE =>
-                         case OS.Path.ext (List.last partName) of
-                              NONE => NONE
-                            | SOME extension =>
-                                let
-                                  fun matchExtension (default : default) =
-                                        extension = #extension default
-                                in
-                                  Option.map
-                                    #contentType
-                                    (List.find matchExtension defaults)
-                                end
+                         let
+                           fun matchExtension (default : default) =
+                                 let
+                                   val ext = "." ^ #extension default
+                                 in
+                                   String.isSuffix ext (List.last partName)
+                                 end
+                         in
+                           Option.map
+                             #contentType
+                             (List.find matchExtension defaults)
+                         end
                 end
         in
           getContentType

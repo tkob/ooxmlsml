@@ -201,6 +201,9 @@ structure Relationship = struct
               |> childNS (ns, "Relationship")
               |> map toRelationship
         end
+
+  fun fromString s = fromReader Substring.getc (Substring.full s)
+  fun fromBytes bytes = fromString (Byte.bytesToString bytes)
 end
 
 structure ContentTypeStream = struct
@@ -272,4 +275,7 @@ structure ContentTypeStream = struct
         in
           getContentType
         end
+
+  fun fromString s = fromReader Substring.getc (Substring.full s)
+  fun fromBytes bytes = fromString (Byte.bytesToString bytes)
 end

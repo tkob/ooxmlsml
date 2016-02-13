@@ -192,3 +192,73 @@ structure Relationship = struct
               |> map toRelationship
         end
 end
+
+structure ContentTypeStream = struct
+  type t = PartIRI.iri -> ContentType.t option
+
+  fun fromReader input1 instream : t =
+        let
+          open UXML.Path
+          infix |>
+          val doc = UXML.Path.fromDocument (UXML.parseDocument input1 instream)
+          val ns =
+                "http://schemas.openxmlformats.org/package/2006/content-types"
+          type default = { extension : string, contentType : ContentType.t }
+          fun toDefault node : default =
+                let
+                  val extension = node |> getAttr "Extension"
+                                       |> Option.valOf
+                                       |> String.map Char.toLower
+                  val contentType = node |> getAttr "ContentType"
+                                         |> Option.valOf
+                                         |> ContentType.fromString
+                in
+                  { extension = extension,
+                    contentType = contentType }
+                end
+          type override = { partName : PartIRI.iri, contentType : ContentType.t }
+          fun toOverride node : override =
+                let
+                  val partName = node |> getAttr "PartName"
+                                      |> Option.valOf
+                                      |> String.map Char.toLower
+                                      |> PartIRI.fromString
+                  val contentType = node |> getAttr "ContentType"
+                                         |> Option.valOf
+                                         |> ContentType.fromString
+                in
+                  { partName = partName,
+                    contentType = contentType }
+                end
+          val defaults = doc |> childNS (ns, "Types")
+                             |> childNS (ns, "Default")
+                             |> map toDefault
+          val overrides = doc |> childNS (ns, "Types")
+                              |> childNS (ns, "Override")
+                              |> map toOverride
+          (* 10.1.2.4 Getting the Content Type of a Part [M2.9] *)
+          fun getContentType partName =
+                let
+                  val partName = List.map (String.map Char.toLower) partName
+                  fun matchPartName (override : override) =
+                        partName = #partName override
+                in
+                  case List.find matchPartName overrides of
+                       SOME override => SOME (#contentType override)
+                     | NONE =>
+                         case OS.Path.ext (List.last partName) of
+                              NONE => NONE
+                            | SOME extension =>
+                                let
+                                  fun matchExtension (default : default) =
+                                        extension = #extension default
+                                in
+                                  Option.map
+                                    #contentType
+                                    (List.find matchExtension defaults)
+                                end
+                end
+        in
+          getContentType
+        end
+end

@@ -157,7 +157,7 @@ structure Relationship = struct
   datatype targetmode = Internal | External
   type uri = string
   type relationship = {
-    targetMode : targetmode option,
+    targetMode : targetmode,
     target : uri,
     typ : string,
     id : string }
@@ -187,6 +187,7 @@ structure Relationship = struct
                         raise Fail ("Invalid TargetMode: " ^ s)
                   val targetMode = node |> getAttr "TargetMode"
                                         |> Option.map stringToTargetMode
+                                        |> (fn x => Option.getOpt (x, Internal))
                   val target = node |> getAttr "Target" |> Option.valOf
                   val typ = node |> getAttr "Type" |> Option.valOf
                   val id = node |> getAttr "Id" |> Option.valOf

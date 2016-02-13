@@ -26,7 +26,7 @@ structure PartIRI = struct
           else segments
         end
 
-  val toString = String.concatWith "/"
+  fun toString iri = "/" ^ String.concatWith "/" iri
 
   (* unit tests *)
   datatype result = Right of iri | Left of string

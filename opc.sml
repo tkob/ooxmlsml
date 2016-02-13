@@ -162,6 +162,16 @@ structure Relationship = struct
     typ : string,
     id : string }
 
+  fun findById ([], id) : relationship option = NONE
+    | findById (rel::rels, id) =
+        if id = #id rel then SOME rel
+        else findById (rels, id)
+
+  fun findByType ([], typ) : relationship option = NONE
+    | findByType (rel::rels, typ) =
+        if typ = #typ rel then SOME rel
+        else findByType (rels, typ)
+
   fun fromReader input1 instream : relationship list =
         let
           open UXML.Path

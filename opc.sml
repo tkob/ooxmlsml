@@ -276,6 +276,8 @@ structure ContentTypeStream = struct
         in
           getContentType
         end
+        handle e => raise Fail ("Error while reading Content Type stream: ["
+                                ^ exnName e ^ ": " ^ exnMessage e ^ "]")
 
   fun fromString s = fromReader Substring.getc (Substring.full s)
   fun fromBytes bytes = fromString (Byte.bytesToString bytes)

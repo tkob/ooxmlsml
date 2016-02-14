@@ -1,3 +1,190 @@
+structure IRI :> sig
+  type segment
+  type path = segment list
+  type iri = {
+    scheme    : string option,
+    authority : string option,
+    path      : path,
+    query     : string option,
+    fragment  : string option }
+
+  exception IRI
+
+  type rule
+
+  val irelativeRef : rule
+  val parse : rule -> string -> iri
+
+  val resolve : {iri : iri, relativeTo : iri } -> iri
+end where type segment = string = struct
+  type segment = string
+  type path = segment list
+  type iri = {
+    scheme    : string option,
+    authority : string option,
+    path      : path,
+    query     : string option,
+    fragment  : string option }
+
+  exception IRI
+
+  type rule = Substring.substring -> iri * Substring.substring
+
+  fun isUnreserved #"-" = true
+    | isUnreserved #"." = true
+    | isUnreserved #"_" = true
+    | isUnreserved #"~" = true
+    | isUnreserved c = Char.isAlpha c orelse Char.isDigit c
+
+  fun isGenDelims #":" = true
+    | isGenDelims #"/" = true
+    | isGenDelims #"?" = true
+    | isGenDelims #"#" = true
+    | isGenDelims #"[" = true
+    | isGenDelims #"]" = true
+    | isGenDelims #"@" = true
+    | isGenDelims _ = false
+
+  fun isSubDelims #"!" = true
+    | isSubDelims #"$" = true
+    | isSubDelims #"&" = true
+    | isSubDelims #"'" = true
+    | isSubDelims #"(" = true
+    | isSubDelims #")" = true
+    | isSubDelims #"*" = true
+    | isSubDelims #"+" = true
+    | isSubDelims #"," = true
+    | isSubDelims #";" = true
+    | isSubDelims #"=" = true
+    | isSubDelims _ = false
+
+  fun isReserved c = isGenDelims c orelse isSubDelims c
+
+  fun isDelimiter #"/" = true
+    | isDelimiter _ = false
+
+  (* parse scheme and colon or raise IRI *)
+  fun scheme s =
+        case Substring.getc s of
+             NONE => raise IRI
+           | SOME (car, s') =>
+               if not (Char.isAlpha car) then raise IRI
+               else
+                 let
+                   fun isSchemeChar c =
+                                Char.isAlpha c
+                         orelse Char.isDigit c
+                         orelse c = #"+"
+                         orelse c = #"-"
+                         orelse c = #"."
+                   val (cdr, s'') = Substring.splitl isSchemeChar s'
+                 in
+                   case Substring.getc s'' of
+                        NONE => raise IRI
+                      | SOME (colon, s''') =>
+                          if colon <> #":" then raise IRI
+                          else
+                            (implode (car::(Substring.explode cdr)), s''')
+                 end
+
+  fun parseIpath s : path =
+        if Substring.isEmpty s then []
+        else map Substring.string (Substring.fields isDelimiter s)
+
+  fun parseIrelativePart s =
+        let
+          val (iauthority, s') =
+            if Substring.isPrefix "//" s then
+              raise Fail ("iauthority not supported: " ^ Substring.string s)
+            else (NONE, s)
+          val ipath = parseIpath s'
+        in
+          (iauthority, ipath)
+        end
+
+  fun irelativeRef s : iri * Substring.substring =
+        let
+          (* irelative-ref  = irelative-part [ "?" iquery ] [ "#" ifragment ] *)
+          fun notQuestionOrHash c = c <> #"?" andalso c <> #"#"
+          val (irelativePart, s') = Substring.splitl notQuestionOrHash s
+          val (iauthority, ipath) = parseIrelativePart irelativePart
+          val iri = { scheme = NONE,
+                      authority = iauthority,
+                      path = ipath,
+                      query = NONE,
+                      fragment = NONE }
+        in
+          (iri ,s')
+        end
+
+  fun parse rule s =
+        let
+          val (iri, s') = rule (Substring.full s)
+        in
+          if Substring.isEmpty s' then iri
+          else raise IRI
+        end
+
+  fun merge ([], r) = ""::r
+    | merge (base, r) = List.revAppend (tl (rev base), r)
+
+  fun removeDotSegments input =
+        let
+              (* A and D *)
+          fun aAndD (".."::input) = aAndD input
+            | aAndD ("."::input) = aAndD input
+            | aAndD input = input
+          fun loop [] output = rev output
+              (* B *)
+            | loop ("."::[])    output = loop [] (""::output) (* /. *)
+            | loop ("."::input) output = loop input output    (* /./ *)
+              (* C *)
+            | loop (".."::[])    []          = loop []      []           (* C /.. *)
+            | loop (".."::[])    (""::[])    = loop []      (""::""::[]) (* C /.. *)
+            | loop (".."::[])    (_::output) = loop []      (""::output) (* C /.. *)
+            | loop (".."::input) []          = loop input   []           (* C /../ *)
+            | loop (".."::input) (""::[])    = loop input   (""::[])     (* C /../ *)
+            | loop (".."::input) (_::output) = loop input   output       (* C /../ *)
+              (* E *)
+            | loop (segment::input) output = loop input (segment::output)
+        in
+          loop (aAndD input) []
+        end
+
+  (* unit tests *)
+  val ["", "a", "g"] = removeDotSegments (String.fields isDelimiter "/a/b/c/./../../g")
+  val ["mid", "6"] = removeDotSegments (String.fields isDelimiter "mid/content=5/../6")
+
+  fun resolve {iri = iri as {scheme = SOME _, ...}, ...} =
+        iri (* TODO: remove_dot_segments(R.path) *)
+    | resolve {iri = iri as {authority = SOME _, ...}, ...} =
+        iri (* TODO: remove_dot_segments(R.path) *)
+    | resolve {iri = {path = [], query = NONE, fragment, ...}, relativeTo} =
+        { scheme    = #scheme    relativeTo,
+          authority = #authority relativeTo,
+          path      = #path      relativeTo,
+          query     = #query     relativeTo,
+          fragment  = fragment }
+    | resolve {iri = {path = [], query, fragment, ...}, relativeTo} =
+        { scheme    = #scheme    relativeTo,
+          authority = #authority relativeTo,
+          path      = #path      relativeTo,
+          query     = query,
+          fragment  = fragment }
+    | resolve {iri = {path = path as ""::_, query, fragment, ...}, relativeTo} =
+        { scheme    = #scheme    relativeTo,
+          authority = #authority relativeTo,
+          path      = path, (* TODO: remove_dot_segments(R.path) *)
+          query     = query,
+          fragment  = fragment }
+    | resolve {iri = {path, query, fragment, ...}, relativeTo : iri} =
+        { scheme    = #scheme    relativeTo,
+          authority = #authority relativeTo,
+          path      = removeDotSegments (merge (#path relativeTo, path)),
+          query     = query,
+          fragment  = fragment }
+end
+
 structure PartIRI = struct
   type segment = string
   type iri = segment list

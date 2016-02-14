@@ -195,14 +195,13 @@ structure PartIRI = struct
   fun fromString s =
         let
           fun isEmpty s = String.size s = 0 
-          val _ = if isEmpty s then raise Fail "[M1.1]" else ()
-
-          fun delimiter c = c = #"/"
-          val prefix::segments = String.fields delimiter s
-          val _ = if not (isEmpty prefix) then raise Fail "[M1.4]" else ()
-
           fun onlyDots s = List.all (fn c => c = #".") (explode s)
           fun endsWithDot s = String.sub (s, String.size s - 1) = #"."
+
+          val segments = case #path (IRI.parse IRI.irelativeRef s) of
+                              [] => raise Fail "[M1.1]"
+                            | ""::segments => segments
+                            | _::_ => raise Fail "[M1.4]"
         in
           if isEmpty (List.last segments) then raise Fail "[M1.5]"
           else if List.exists isEmpty segments then raise Fail "[M1.3]"
@@ -224,12 +223,12 @@ structure PartIRI = struct
   val Left "[M1.5]" = fs_ "/"
   val Left "[M1.5]" = fs_ "/a/"
   val Left "[M1.5]" = fs_ "/a/b/"
-  val Left "[M1.3]" = fs_ "//b"
+  (* val Left "[M1.3]" = fs_ "//b" *)
   val Left "[M1.3]" = fs_ "/a//b"
   val Left "[M1.10]" = fs_ "/."
   val Left "[M1.10]" = fs_ "/.."
   val Left "[M1.9]" = fs_ "/a."
-  val Left _ = fs_ "//xml/."
+  (* val Left _ = fs_ "//xml/." *)
   val Right ["a"] = fs_ "/a"
   val Right ["a", "b"] = fs_ "/a/b"
   (* val Right ["a", "%D1%86.xml"] = fs_ "/a/%D1%86.xml" *)

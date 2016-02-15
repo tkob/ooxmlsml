@@ -95,7 +95,13 @@ end where type segment = string = struct
         let
           val (iauthority, s') =
             if Substring.isPrefix "//" s then
-              raise Fail ("iauthority not supported: " ^ Substring.string s)
+              let
+                fun notDelimiter c = not (isDelimiter c)
+                val (iauthority, s') =
+                  Substring.splitl notDelimiter (Substring.dropl isDelimiter s)
+              in
+                (SOME (Substring.string iauthority), s')
+              end
             else (NONE, s)
           val ipath = parseIpath s'
         in

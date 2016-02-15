@@ -169,9 +169,9 @@ end where type segment = string = struct
           fragment  = fragment }
 
   fun resolve {iri = iri as {scheme = SOME _, ...}, ...} =
-        iri (* TODO: remove_dot_segments(R.path) *)
+        normalize iri
     | resolve {iri = iri as {authority = SOME _, ...}, ...} =
-        iri (* TODO: remove_dot_segments(R.path) *)
+        normalize iri
     | resolve {iri = {path = [], query = NONE, fragment, ...}, relativeTo} =
         { scheme    = #scheme    relativeTo,
           authority = #authority relativeTo,
@@ -187,7 +187,7 @@ end where type segment = string = struct
     | resolve {iri = {path = path as ""::_, query, fragment, ...}, relativeTo} =
         { scheme    = #scheme    relativeTo,
           authority = #authority relativeTo,
-          path      = path, (* TODO: remove_dot_segments(R.path) *)
+          path      = removeDotSegments path,
           query     = query,
           fragment  = fragment }
     | resolve {iri = {path, query, fragment, ...}, relativeTo : iri} =

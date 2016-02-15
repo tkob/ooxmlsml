@@ -191,9 +191,9 @@ end where type segment = string = struct
           fragment  = fragment }
 end
 
-structure PartIRI = struct
+structure PartName = struct
   type segment = string
-  type iri = segment list
+  type name = segment list
 
   fun fromIRI ({scheme = SOME _, ...} : IRI.iri) = raise Fail "[M1.4]"
     | fromIRI ({authority = SOME _, ...}) = raise Fail "[M1.3]"
@@ -221,10 +221,10 @@ structure PartIRI = struct
           fragment = NONE }
 
   fun fromString s = fromIRI (IRI.parse IRI.irelativeRef s)
-  fun toString iri = "/" ^ String.concatWith "/" iri
+  fun toString segments = "/" ^ String.concatWith "/" segments
 
   (* unit tests *)
-  datatype result = Right of iri | Left of string
+  datatype result = Right of name | Left of string
   fun fs_ s = Right (fromString s) handle Fail s => Left s
   val Left "[M1.1]" = fs_ ""
   val Left "[M1.4]" = fs_ "a"
@@ -343,7 +343,7 @@ structure Opc = struct
   type part = {
     stream : Word8Vector.vector,
     (* [M1.1] *)
-    name : PartIRI.iri,
+    name : PartName.name,
     (* [M1.2] *)
     contentType : ContentType.t }
 end
@@ -403,7 +403,7 @@ structure Relationship = struct
 end
 
 structure ContentTypeStream = struct
-  type t = PartIRI.iri -> ContentType.t option
+  type t = PartName.name -> ContentType.t option
 
   fun fromReader input1 instream : t =
         let
@@ -425,13 +425,13 @@ structure ContentTypeStream = struct
                   { extension = extension,
                     contentType = contentType }
                 end
-          type override = { partName : PartIRI.iri, contentType : ContentType.t }
+          type override = { partName : PartName.name, contentType : ContentType.t }
           fun toOverride node : override =
                 let
                   val partName = node |> getAttr "PartName"
                                       |> Option.valOf
                                       |> String.map Char.toLower
-                                      |> PartIRI.fromString
+                                      |> PartName.fromString
                   val contentType = node |> getAttr "ContentType"
                                          |> Option.valOf
                                          |> ContentType.fromString

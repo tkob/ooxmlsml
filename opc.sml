@@ -189,29 +189,32 @@ structure PartIRI = struct
   type segment = string
   type iri = segment list
 
-  fun isIpchar c = c <> #"/" (* TODO: tentative implementation *)
-  fun onlyIpchars s = List.all isIpchar (explode s)
-
-  fun fromString s =
+  fun fromIRI ({scheme = SOME _, ...} : IRI.iri) = raise Fail "[M1.4]"
+    | fromIRI ({authority = SOME _, ...}) = raise Fail "[M1.3]"
+    | fromIRI ({path = [], ...} : IRI.iri) = raise Fail "[M1.1]"
+    | fromIRI ({path = ""::segments, ...}) =
         let
           fun isEmpty s = String.size s = 0 
           fun onlyDots s = List.all (fn c => c = #".") (explode s)
           fun endsWithDot s = String.sub (s, String.size s - 1) = #"."
-
-          val segments = case #path (IRI.parse IRI.irelativeRef s) of
-                              [] => raise Fail "[M1.1]"
-                            | ""::segments => segments
-                            | _::_ => raise Fail "[M1.4]"
         in
           if isEmpty (List.last segments) then raise Fail "[M1.5]"
           else if List.exists isEmpty segments then raise Fail "[M1.3]"
-          else if not (List.all onlyIpchars segments) then raise Fail "[M1.6]"
           (* TODO: [M1.7] and [M1.8] not implemented yet *)
           else if List.exists onlyDots segments then raise Fail "[M1.10]"
           else if List.exists endsWithDot segments then raise Fail "[M1.9]"
           else segments
         end
+    | fromIRI ({path = _::_, ...}) = raise Fail "[M1.4]"
 
+  fun toIRI segments =
+        { scheme = NONE,
+          authority = NONE,
+          path = ""::segments,
+          query = NONE,
+          fragment = NONE }
+
+  fun fromString s = fromIRI (IRI.parse IRI.irelativeRef s)
   fun toString iri = "/" ^ String.concatWith "/" iri
 
   (* unit tests *)

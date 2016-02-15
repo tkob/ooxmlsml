@@ -161,6 +161,13 @@ end where type segment = string = struct
   val ["", "a", "g"] = removeDotSegments (String.fields isDelimiter "/a/b/c/./../../g")
   val ["mid", "6"] = removeDotSegments (String.fields isDelimiter "mid/content=5/../6")
 
+  fun normalize {scheme, authority, path, query, fragment} =
+        { scheme    = scheme,
+          authority = authority,
+          path      = removeDotSegments path,
+          query     = query,
+          fragment  = fragment }
+
   fun resolve {iri = iri as {scheme = SOME _, ...}, ...} =
         iri (* TODO: remove_dot_segments(R.path) *)
     | resolve {iri = iri as {authority = SOME _, ...}, ...} =

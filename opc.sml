@@ -158,10 +158,6 @@ end where type segment = string = struct
           loop (aAndD input) []
         end
 
-  (* unit tests *)
-  val ["", "a", "g"] = removeDotSegments (String.fields isDelimiter "/a/b/c/./../../g")
-  val ["mid", "6"] = removeDotSegments (String.fields isDelimiter "mid/content=5/../6")
-
   fun normalize {scheme, authority, path, query, fragment} =
         { scheme    = scheme,
           authority = authority,

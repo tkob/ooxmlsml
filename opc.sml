@@ -453,3 +453,86 @@ structure ContentTypeStream = struct
   fun fromString s = fromReader Substring.getc (Substring.full s)
   fun fromBytes bytes = fromString (Byte.bytesToString bytes)
 end
+
+structure LogicalItemName = struct
+  type suffix = { pieceNumber : int, last : bool }
+  type t = { prefix : string, suffix : suffix option }
+end
+
+signature PACKAGE = sig
+  type package
+  val openIn : string -> package
+  val closeIn : package -> unit
+  val getPart : package * PartName.name -> Opc.part option
+  val getPackageRels : package -> Relationship.relationship list
+  val getRels : package * PartName.name -> Relationship.relationship list
+end
+
+structure ZipPackage :> PACKAGE = struct
+  type package = {
+    pkzip : Pkzip.infile,
+    contentTypes : ContentTypeStream.t }
+
+  fun openIn fileName =
+        let
+          val pkzip = Pkzip.openIn fileName
+        in
+          case Pkzip.findEntry (pkzip, "[Content_Types].xml") of
+               NONE =>
+                 raise Fail ("[Content_Types].xml not found in " ^ fileName)
+             | SOME entry =>
+                 let
+                   val bytes = Pkzip.readEntry (pkzip, entry)
+                   val contentTypes = ContentTypeStream.fromBytes bytes
+                 in
+                   { pkzip = pkzip,
+                     contentTypes = contentTypes }
+                 end
+          handle e => (Pkzip.closeIn pkzip; raise e)
+        end
+
+  fun closeIn ({pkzip, ...} : package) =
+        Pkzip.closeIn pkzip
+
+  fun partNameToZipItemName partName = String.concatWith "/" partName
+
+  fun getPart ({pkzip, contentTypes, ...} : package, partName) : Opc.part option =
+        let
+          val entries = Pkzip.entries pkzip
+          val fileName = partNameToZipItemName partName
+        in
+          case Pkzip.findEntry (pkzip, fileName) of
+               NONE => NONE
+             | SOME entry =>
+                 let
+                   val stream = Pkzip.readEntry (pkzip, entry)
+                   val contentType = Option.valOf (contentTypes partName)
+                 in
+                   SOME { stream = stream,
+                          name = partName,
+                          contentType = contentType }
+                 end
+        end
+
+  fun getPackageRels package =
+        let
+          val partName = PartName.fromString "/_rels/.rels"
+        in
+          case getPart (package, partName) of
+               NONE => []
+             | SOME part => Relationship.fromBytes (#stream part)
+        end
+
+  fun getRels (package, partName) =
+        let
+          val baseIri = PartName.toIRI partName
+          val relativeIri : IRI.iri =
+            IRI.parse IRI.irelativeRef ("_rels/" ^ List.last partName ^ ".rels")
+          val targetIri : IRI.iri =
+            IRI.resolve {relativeTo = baseIri, iri = relativeIri}
+        in
+          case getPart (package, PartName.fromIRI targetIri) of
+               NONE => []
+             | SOME part => Relationship.fromBytes (#stream part)
+        end
+end

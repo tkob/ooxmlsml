@@ -229,26 +229,6 @@ structure PartName = struct
 
   fun fromString s = fromIRI (IRI.parse IRI.irelativeRef s)
   fun toString segments = "/" ^ String.concatWith "/" segments
-
-  (* unit tests *)
-  datatype result = Right of name | Left of string
-  fun fs_ s = Right (fromString s) handle Fail s => Left s
-  val Left "[M1.1]" = fs_ ""
-  val Left "[M1.4]" = fs_ "a"
-  val Left "[M1.4]" = fs_ "a/b"
-  val Left "[M1.5]" = fs_ "/"
-  val Left "[M1.5]" = fs_ "/a/"
-  val Left "[M1.5]" = fs_ "/a/b/"
-  (* val Left "[M1.3]" = fs_ "//b" *)
-  val Left "[M1.3]" = fs_ "/a//b"
-  val Left "[M1.10]" = fs_ "/."
-  val Left "[M1.10]" = fs_ "/.."
-  val Left "[M1.9]" = fs_ "/a."
-  (* val Left _ = fs_ "//xml/." *)
-  val Right ["a"] = fs_ "/a"
-  val Right ["a", "b"] = fs_ "/a/b"
-  (* val Right ["a", "%D1%86.xml"] = fs_ "/a/%D1%86.xml" *)
-  val Right ["xml", "item1.xml"] = fs_ "/xml/item1.xml"
 end
 
 structure ContentType = struct
@@ -334,14 +314,6 @@ structure ContentType = struct
         in
           #typ t ^ #subtype t ^ params
         end
-
-  (* unit tests *)
-  val { typ = "application", subtype = "xml", parameters = [] } =
-    fromString "application/xml"
-  val { typ = "application",
-        subtype = "vnd.openxmlformats-officedocument.spreadsheetml.printersettings",
-        parameters = [] } =
-    fromString "application/vnd.openxmlformats-officedocument.spreadsheetml.printerSettings"
 end
 
 structure Opc = struct

@@ -15,6 +15,7 @@ structure IRI :> sig
   val irelativeRef : rule
   val parse : rule -> string -> iri
 
+  val normalize : iri -> iri
   val resolve : {iri : iri, relativeTo : iri } -> iri
 end where type segment = string = struct
   type segment = string

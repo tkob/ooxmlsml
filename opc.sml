@@ -353,7 +353,7 @@ structure Relationship = struct
   type uri = string
   type relationship = {
     targetMode : targetmode,
-    target : uri,
+    target : IRI.iri,
     typ : string,
     id : string }
 
@@ -383,7 +383,12 @@ structure Relationship = struct
                   val targetMode = node |> getAttr "TargetMode"
                                         |> Option.map stringToTargetMode
                                         |> (fn x => Option.getOpt (x, Internal))
-                  val target = node |> getAttr "Target" |> Option.valOf
+                  val parseURL = if targetMode = Internal
+                                 then IRI.parse IRI.irelativeRef
+                                 else IRI.parse IRI.iriReference
+                  val target = node |> getAttr "Target"
+                                    |> Option.valOf
+                                    |> parseURL
                   val typ = node |> getAttr "Type" |> Option.valOf
                   val id = node |> getAttr "Id" |> Option.valOf
                 in

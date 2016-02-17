@@ -12,7 +12,9 @@ structure IRI :> sig
 
   type rule
 
+  val iri : rule
   val irelativeRef : rule
+  val iriReference : rule
   val parse : rule -> string -> iri
 
   val normalize : iri -> iri
@@ -109,10 +111,13 @@ end where type segment = string = struct
           (iauthority, ipath)
         end
 
+  val parseIhierPart = parseIrelativePart
+
+  fun notQuestionOrHash c = c <> #"?" andalso c <> #"#"
+
   fun irelativeRef s : iri * Substring.substring =
         let
           (* irelative-ref  = irelative-part [ "?" iquery ] [ "#" ifragment ] *)
-          fun notQuestionOrHash c = c <> #"?" andalso c <> #"#"
           val (irelativePart, s') = Substring.splitl notQuestionOrHash s
           val (iauthority, ipath) = parseIrelativePart irelativePart
           val iri = { scheme = NONE,
@@ -123,6 +128,25 @@ end where type segment = string = struct
         in
           (iri ,s')
         end
+
+  fun iri s =
+        (* IRI = scheme ":" ihier-part [ "?" iquery ] [ "#" ifragment ] *)
+        let
+          val (scheme, s') = scheme s
+          val (ihierPart, s'') = Substring.splitl notQuestionOrHash s'
+          val (iauthority, ipath) = parseIhierPart ihierPart
+          val iri = { scheme = SOME scheme,
+                      authority = iauthority,
+                      path = ipath,
+                      query = NONE,
+                      fragment = NONE }
+        in
+          (iri, s'')
+        end
+
+  fun iriReference s =
+        (* IRI-reference  = IRI / irelative-ref *)
+        iri s handle IRI => irelativeRef s
 
   fun parse rule s =
         let

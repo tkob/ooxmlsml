@@ -116,8 +116,8 @@ end where type segment = string = struct
   fun notQuestionOrHash c = c <> #"?" andalso c <> #"#"
 
   fun irelativeRef s : iri * Substring.substring =
+        (* irelative-ref  = irelative-part [ "?" iquery ] [ "#" ifragment ] *)
         let
-          (* irelative-ref  = irelative-part [ "?" iquery ] [ "#" ifragment ] *)
           val (irelativePart, s') = Substring.splitl notQuestionOrHash s
           val (iauthority, ipath) = parseIrelativePart irelativePart
           val iri = { scheme = NONE,
@@ -126,7 +126,7 @@ end where type segment = string = struct
                       query = NONE,
                       fragment = NONE }
         in
-          (iri ,s')
+          (iri, s')
         end
 
   fun iri s =

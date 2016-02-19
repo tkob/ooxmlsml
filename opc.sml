@@ -362,9 +362,9 @@ structure Relationship = struct
         if id = #id rel then SOME rel
         else findById (rels, id)
 
-  fun findByType ([], typ) : relationship option = NONE
+  fun findByType ([], typ) : relationship list = []
     | findByType (rel::rels, typ) =
-        if typ = #typ rel then SOME rel
+        if typ = #typ rel then rel::findByType (rels, typ)
         else findByType (rels, typ)
 
   fun fromReader input1 instream : relationship list =

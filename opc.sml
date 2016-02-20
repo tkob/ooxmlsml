@@ -565,3 +565,74 @@ structure ZipPackage :> PACKAGE = struct
              | SOME part => Relationship.fromBytes (#stream part)
         end
 end
+
+functor PackageNavigator(P : PACKAGE) :> sig
+  type navigator
+
+  exception PackageNavigator
+
+  val |> : 'a * ('a -> 'b) -> 'b
+
+  val ofPackage : P.package -> navigator
+
+  val id : string -> navigator -> navigator
+  val typ : string -> navigator -> navigator list
+  val target : navigator -> IRI.iri option
+  val getStream : navigator -> Word8Vector.vector
+end = struct
+  datatype pointer = Package of Relationship.relationship list
+                   | Part of IRI.iri * Relationship.relationship list
+  type navigator = P.package * pointer
+
+  exception PackageNavigator
+
+  infix |>
+  fun a |> b = b a
+
+  fun ofPackage package = (package, Package (P.getPackageRels package))
+
+  fun rels (Package rels) = rels
+    | rels (Part (_, rels)) = rels
+
+  fun id id (package, pointer) =
+        case Relationship.findById (rels pointer, id) of
+             NONE => raise Fail ("id " ^ id ^ "not found")
+           | SOME {target, ...} =>
+               let
+                 val partName = PartName.fromIRI target
+                 val rels = P.getRels (package, partName)
+               in
+                 (package, Part (target, rels))
+               end
+
+  fun typ typ (package, pointer) =
+        let
+          val rels = Relationship.findByType (rels pointer, typ)
+          fun f ({target, ...} : Relationship.relationship) =
+                let
+                  val baseName =
+                    case pointer of
+                         Package _ => IRI.parse IRI.irelativeRef  "/"
+                       | Part (iri, _) => iri
+                  val partIRI =
+                    IRI.resolve {iri = target, relativeTo = baseName}
+                  val partName = PartName.fromIRI partIRI
+                  val rels = P.getRels (package, partName)
+                in
+                  (package, Part (partIRI, rels))
+                end
+        in
+          map f rels
+        end
+
+  fun target (_, Package _) = NONE
+    | target (_, Part (uri, _)) = SOME uri
+
+  fun getStream (package, Package _) =
+        raise Fail "getStream on a package not supported"
+    | getStream (package, Part (uri, _)) =
+        #stream (Option.valOf (P.getPart (package, PartName.fromIRI uri)))
+
+end
+
+structure ZipNavigator = PackageNavigator(ZipPackage)

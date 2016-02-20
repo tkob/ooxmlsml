@@ -599,10 +599,16 @@ end = struct
              NONE => raise Fail ("id " ^ id ^ "not found")
            | SOME {target, ...} =>
                let
-                 val partName = PartName.fromIRI target
+                 val baseName =
+                   case pointer of
+                        Package _ => IRI.parse IRI.irelativeRef  "/"
+                      | Part (iri, _) => iri
+                 val partIRI =
+                    IRI.resolve {iri = target, relativeTo = baseName}
+                 val partName = PartName.fromIRI partIRI
                  val rels = P.getRels (package, partName)
                in
-                 (package, Part (target, rels))
+                 (package, Part (partIRI, rels))
                end
 
   fun typ typ (package, pointer) =

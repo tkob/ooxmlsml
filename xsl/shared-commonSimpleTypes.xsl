@@ -17,6 +17,7 @@
         </xsl:template>
 
         <xsl:template match="xsd:restriction">
+                <xsl:variable name="t" select="substring-after(@base, ':')"/>
                 <xsl:choose>
                         <xsl:when test="xsd:enumeration">
                                 <xsl:text>datatype t = </xsl:text>
@@ -45,7 +46,7 @@
                         </xsl:when>
                         <xsl:otherwise>
                                 <xsl:text>type t = </xsl:text>
-                                <xsl:value-of select="@base"/>
+                                <xsl:value-of select="$t"/>
                                 <xsl:text>.t</xsl:text>
                         </xsl:otherwise>
                 </xsl:choose>

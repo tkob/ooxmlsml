@@ -57,6 +57,12 @@
                 <xsl:text>type t = string&#10;</xsl:text>
         </xsl:template>
 
+        <xsl:template match="xsd:list">
+                <xsl:text>type t = </xsl:text>
+                <xsl:value-of select="@itemType"/>
+                <xsl:text>.t list&#10;</xsl:text>
+        </xsl:template>
+
         <xsl:template match="xsd:enumeration">
                 <xsl:choose>
                         <xsl:when test="position() != 1">

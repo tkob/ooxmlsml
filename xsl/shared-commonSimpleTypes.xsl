@@ -67,6 +67,10 @@
                         <xsl:when test="@value = ''">
                                 <xsl:text>Blank</xsl:text>
                         </xsl:when>
+                        <xsl:when test="number(substring(@value, 1, 1))">
+                                <xsl:text>C_</xsl:text>
+                                <xsl:value-of select="@value"/>
+                        </xsl:when>
                         <xsl:otherwise>
                                 <xsl:value-of select="@value"/>
                         </xsl:otherwise>

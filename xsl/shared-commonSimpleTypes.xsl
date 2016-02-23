@@ -34,6 +34,12 @@
                         <xsl:when test="@base = 'xsd:NCName'">
                                 <xsl:text>type t = string</xsl:text>
                         </xsl:when>
+                        <xsl:when test="@base = 'xsd:integer'">
+                                <xsl:text>type t = string</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@base = 'xsd:unsignedInt'">
+                                <xsl:text>type t = string</xsl:text>
+                        </xsl:when>
                         <xsl:when test="@base = 'xsd:unsignedLong'">
                                 <xsl:text>type t = string</xsl:text>
                         </xsl:when>

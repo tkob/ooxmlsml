@@ -11,7 +11,7 @@
         <xsl:template match="xsd:simpleType">
                 <xsl:text>structure </xsl:text>
                 <xsl:value-of select="@name"/>
-                <xsl:text> = struct&#10; </xsl:text>
+                <xsl:text> = struct&#10;</xsl:text>
                 <xsl:apply-templates select="*"/>
                 <xsl:text>end&#10;&#10;</xsl:text>
         </xsl:template>

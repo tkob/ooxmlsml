@@ -116,16 +116,29 @@
                                 </xsl:otherwise>
                         </xsl:choose>
                 </xsl:variable>
+                <xsl:variable name="fieldName">
+                        <xsl:choose>
+                                <xsl:when test="starts-with(@ref, 'r:')">
+                                        <xsl:value-of select="substring-after(@ref, ':')"/>
+                                </xsl:when>
+                                <xsl:when test="@name = 'val'">
+                                        <xsl:text>value</xsl:text>
+                                </xsl:when>
+                                <xsl:when test="@name = 'type'">
+                                        <xsl:text>typ</xsl:text>
+                                </xsl:when>
+                                <xsl:when test="@name = 'and' or @name = 'local' or @name = 'in' or @name = 'end'">
+                                        <xsl:value-of select="@name"/>
+                                        <xsl:text>'</xsl:text>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                        <xsl:value-of select="@name"/>
+                                </xsl:otherwise>
+                        </xsl:choose>
+                </xsl:variable>
                 <xsl:text>    </xsl:text>
-                <xsl:choose>
-                        <xsl:when test="starts-with(@ref, 'r:')">
-                                <xsl:value-of select="substring-after(@ref, ':')"/>
-                        </xsl:when>
-                        <xsl:otherwise>
-                                <xsl:value-of select="@name"/>
-                        </xsl:otherwise>
-                </xsl:choose>
-                <xsl:text>_ : </xsl:text>
+                <xsl:value-of select="$fieldName"/>
+                <xsl:text> : </xsl:text>
                 <xsl:choose>
                         <xsl:when test="starts-with(@ref, 'r:')">
                                 <xsl:text>string</xsl:text>
@@ -192,9 +205,26 @@
                                 </xsl:otherwise>
                         </xsl:choose>
                 </xsl:variable>
+                <xsl:variable name="fieldName">
+                        <xsl:choose>
+                                <xsl:when test="@name = 'val'">
+                                        <xsl:text>value</xsl:text>
+                                </xsl:when>
+                                <xsl:when test="@name = 'type'">
+                                        <xsl:text>typ</xsl:text>
+                                </xsl:when>
+                                <xsl:when test="@name = 'and' or @name = 'local' or @name = 'in' or @name = 'end' or @name = 'tupleCache' or @name = 'odxf' or @name = 'securityDescriptor'">
+                                        <xsl:value-of select="@name"/>
+                                        <xsl:text>'</xsl:text>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                        <xsl:value-of select="@name"/>
+                                </xsl:otherwise>
+                        </xsl:choose>
+                </xsl:variable>
                 <xsl:text>    </xsl:text>
-                <xsl:value-of select="@name"/>
-                <xsl:text>_: </xsl:text>
+                <xsl:value-of select="$fieldName"/>
+                <xsl:text>: </xsl:text>
                 <xsl:value-of select="$t"/>
                 <xsl:choose>
                         <xsl:when test="starts-with($t, 'ST_')">

@@ -6,6 +6,9 @@
 
         <xsl:template match="/xsd:schema">
                 <xsl:apply-templates select="xsd:simpleType"/>
+                <xsl:text>structure CT = struct&#10;</xsl:text>
+                <xsl:apply-templates select="xsd:complexType"/>
+                <xsl:text>end&#10;</xsl:text>
         </xsl:template>
         
         <xsl:template match="xsd:simpleType">
@@ -82,4 +85,124 @@
                         </xsl:otherwise>
                 </xsl:choose>
         </xsl:template>
+
+        <xsl:template match="xsd:complexType">
+                <xsl:choose>
+                        <xsl:when test="position() = 1">
+                                <xsl:text>datatype </xsl:text>
+                        </xsl:when>
+                        <xsl:otherwise>
+                                <xsl:text>and </xsl:text>
+                        </xsl:otherwise>
+                </xsl:choose>
+                <xsl:value-of select="@name"/>
+                <xsl:text> = </xsl:text>
+                <xsl:value-of select="@name"/>
+                <xsl:text> of {&#10;</xsl:text>
+                <xsl:apply-templates select="xsd:attribute"/>
+                <xsl:apply-templates select="xsd:sequence"/>
+                <xsl:text>    dummy : unit&#10;</xsl:text>
+                <xsl:text>  }&#10;</xsl:text>
+        </xsl:template>
+
+        <xsl:template match="xsd:attribute">
+                <xsl:variable name="t">
+                        <xsl:choose>
+                                <xsl:when test="contains(@type, ':')">
+                                        <xsl:value-of select="substring-after(@type, ':')"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                        <xsl:value-of select="@type"/>
+                                </xsl:otherwise>
+                        </xsl:choose>
+                </xsl:variable>
+                <xsl:text>    </xsl:text>
+                <xsl:choose>
+                        <xsl:when test="starts-with(@ref, 'r:')">
+                                <xsl:value-of select="substring-after(@ref, ':')"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                                <xsl:value-of select="@name"/>
+                        </xsl:otherwise>
+                </xsl:choose>
+                <xsl:text>_ : </xsl:text>
+                <xsl:choose>
+                        <xsl:when test="starts-with(@ref, 'r:')">
+                                <xsl:text>string</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@type = 'xsd:string'">
+                                <xsl:text>string</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@type = 'xsd:boolean'">
+                                <xsl:text>bool</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@type = 'xsd:base64Binary'">
+                                <xsl:text>string</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@type = 'xsd:token'">
+                                <xsl:text>string</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@type = 'xsd:int'">
+                                <xsl:text>string</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@type = 'xsd:unsignedInt'">
+                                <xsl:text>string</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@type = 'xsd:unsignedShort'">
+                                <xsl:text>string</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@type = 'xsd:unsignedByte'">
+                                <xsl:text>string</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@type = 'xsd:double'">
+                                <xsl:text>string</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="@type = 'xsd:dateTime'">
+                                <xsl:text>string</xsl:text>
+                        </xsl:when>
+                        <xsl:otherwise>
+                                <xsl:value-of select="$t"/>
+                                <xsl:text>.t</xsl:text>
+                        </xsl:otherwise>
+                </xsl:choose>
+                <!--
+                <xsl:choose>
+                        <xsl:when test="position() != last()">
+                -->
+                                <xsl:text>,</xsl:text>
+                <!--
+                        </xsl:when>
+                </xsl:choose>
+                -->
+                <xsl:text>&#10;</xsl:text>
+        </xsl:template>
+
+        <xsl:template match="xsd:sequence">
+                <xsl:apply-templates select="xsd:element[@name != '']"/>
+        </xsl:template>
+
+        <xsl:template match="xsd:element">
+                <xsl:variable name="t">
+                        <xsl:choose>
+                                <xsl:when test="contains(@type, ':')">
+                                        <xsl:value-of select="substring-after(@type, ':')"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                        <xsl:value-of select="@type"/>
+                                </xsl:otherwise>
+                        </xsl:choose>
+                </xsl:variable>
+                <xsl:text>    </xsl:text>
+                <xsl:value-of select="@name"/>
+                <xsl:text>_: </xsl:text>
+                <xsl:value-of select="$t"/>
+                <xsl:choose>
+                        <xsl:when test="starts-with($t, 'ST_')">
+                                <xsl:text>.t</xsl:text>
+                        </xsl:when>
+                </xsl:choose>
+                <xsl:text>,</xsl:text>
+                <xsl:text>&#10;</xsl:text>
+        </xsl:template>
+
 </xsl:stylesheet>

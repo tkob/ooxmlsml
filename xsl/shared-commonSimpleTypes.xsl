@@ -231,6 +231,16 @@
                                 <xsl:text>.t</xsl:text>
                         </xsl:when>
                 </xsl:choose>
+                <xsl:choose>
+                        <xsl:when test="@minOccurs = '0' and @maxOccurs = '1'">
+                                <xsl:text> option</xsl:text>
+                        </xsl:when>
+                </xsl:choose>
+                <xsl:choose>
+                        <xsl:when test="@minOccurs = '0' and @maxOccurs != '1'">
+                                <xsl:text> list</xsl:text>
+                        </xsl:when>
+                </xsl:choose>
                 <xsl:text>,</xsl:text>
                 <xsl:text>&#10;</xsl:text>
         </xsl:template>

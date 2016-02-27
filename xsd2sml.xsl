@@ -19,11 +19,14 @@
                 <xsl:text>structure </xsl:text>
                 <xsl:value-of select="@name"/>
                 <xsl:text> = struct&#10;</xsl:text>
-                <xsl:apply-templates select="*"/>
+                <xsl:apply-templates select="*">
+                        <xsl:with-param name="typeName" select="@name"/>
+                </xsl:apply-templates>
                 <xsl:text>end&#10;&#10;</xsl:text>
         </xsl:template>
 
         <xsl:template match="xsd:restriction">
+                <xsl:param name="typeName"/>
                 <xsl:variable name="t">
                         <xsl:choose>
                                 <xsl:when test="contains(@base, ':')">
@@ -39,6 +42,10 @@
                                 <xsl:text>  datatype t = </xsl:text>
                                 <xsl:apply-templates select="*"/>
                                 <xsl:text>&#10;</xsl:text>
+                                <xsl:apply-templates select="*" mode="fromString"/>
+                                <xsl:text>    | fromString s'' = raise Fail (s'' ^ " not allowed for </xsl:text>
+                                <xsl:value-of select="$typeName"/>
+                                <xsl:text>")&#10;</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:string'">
                                 <xsl:text>  type t = string (* xsd:string *)&#10;</xsl:text>
@@ -104,6 +111,33 @@
                                 <xsl:value-of select="@value"/>
                         </xsl:otherwise>
                 </xsl:choose>
+        </xsl:template>
+
+        <xsl:template match="xsd:enumeration" mode="fromString">
+                <xsl:choose>
+                        <xsl:when test="position() = 1">
+                                <xsl:text>  fun fromString </xsl:text>
+                        </xsl:when>
+                        <xsl:otherwise>
+                                <xsl:text>    | fromString </xsl:text>
+                        </xsl:otherwise>
+                </xsl:choose>
+                <xsl:text>"</xsl:text>
+                <xsl:value-of select="@value"/>
+                <xsl:text>" = </xsl:text>
+                <xsl:choose>
+                        <xsl:when test="@value = ''">
+                                <xsl:text>Blank</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="number(substring(@value, 1, 1))">
+                                <xsl:text>C_</xsl:text>
+                                <xsl:value-of select="@value"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                                <xsl:value-of select="@value"/>
+                        </xsl:otherwise>
+                </xsl:choose>
+                <xsl:text>&#10;</xsl:text>
         </xsl:template>
 
         <xsl:template match="xsd:complexType">

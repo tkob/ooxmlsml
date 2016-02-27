@@ -302,9 +302,7 @@
                         <xsl:when test="@minOccurs = '0' and @maxOccurs = '1'">
                                 <xsl:text> option</xsl:text>
                         </xsl:when>
-                </xsl:choose>
-                <xsl:choose>
-                        <xsl:when test="@minOccurs = '0' and @maxOccurs != '1'">
+                        <xsl:when test="@minOccurs != '1' or @maxOccurs != '1'">
                                 <xsl:text> list</xsl:text>
                         </xsl:when>
                 </xsl:choose>
@@ -478,7 +476,7 @@
                         <xsl:when test="@minOccurs = '0' and @maxOccurs = '1'">
                                 <xsl:text> |> (fn (x::_) => SOME x | _ => NONE)</xsl:text>
                         </xsl:when>
-                        <xsl:when test="@minOccurs = '0' and @maxOccurs != '1'">
+                        <xsl:when test="@minOccurs != '1' or @maxOccurs != '1'">
                         </xsl:when>
                         <xsl:otherwise>
                                 <xsl:text> |> hd</xsl:text>

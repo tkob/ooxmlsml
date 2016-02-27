@@ -13,6 +13,7 @@
                                 <xsl:text>  infix |>&#10;</xsl:text>
                                 <xsl:text>  val main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"&#10;</xsl:text>
                                 <xsl:text>  fun flatMap f NONE = NONE | flatMap f (SOME v) = f v&#10;</xsl:text>
+                                <xsl:text>  fun toBool "true" = SOME true | toBool "false" = SOME false | toBool "1" = SOME true | toBool "0" = SOME false | toBool _ = NONE&#10;</xsl:text>
                                 <xsl:text>&#10;</xsl:text>
                                 <xsl:apply-templates select="xsd:complexType"/>
                                 <xsl:text>&#10;</xsl:text>
@@ -378,7 +379,7 @@
                         <xsl:when test="@type = 'xsd:string'">
                         </xsl:when>
                         <xsl:when test="@type = 'xsd:boolean'">
-                                <xsl:text> |> flatMap Bool.fromString</xsl:text>
+                                <xsl:text> |> flatMap toBool</xsl:text>
                         </xsl:when>
                         <xsl:when test="@type = 'xsd:base64Binary'">
                         </xsl:when>

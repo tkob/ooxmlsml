@@ -6,9 +6,13 @@
 
         <xsl:template match="/xsd:schema">
                 <xsl:apply-templates select="xsd:simpleType"/>
-                <xsl:text>structure CT = struct&#10;</xsl:text>
-                <xsl:apply-templates select="xsd:complexType"/>
-                <xsl:text>end&#10;</xsl:text>
+                <xsl:choose>
+                        <xsl:when test="xsd:complexType">
+                                <xsl:text>structure CT = struct&#10;</xsl:text>
+                                <xsl:apply-templates select="xsd:complexType"/>
+                                <xsl:text>end&#10;</xsl:text>
+                        </xsl:when>
+                </xsl:choose>
         </xsl:template>
         
         <xsl:template match="xsd:simpleType">

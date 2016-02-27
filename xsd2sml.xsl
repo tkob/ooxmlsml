@@ -143,10 +143,10 @@
         <xsl:template match="xsd:complexType">
                 <xsl:choose>
                         <xsl:when test="position() = 1">
-                                <xsl:text>datatype </xsl:text>
+                                <xsl:text>  datatype </xsl:text>
                         </xsl:when>
                         <xsl:otherwise>
-                                <xsl:text>and </xsl:text>
+                                <xsl:text>  and </xsl:text>
                         </xsl:otherwise>
                 </xsl:choose>
                 <xsl:value-of select="@name"/>
@@ -155,8 +155,7 @@
                 <xsl:text> of {&#10;</xsl:text>
                 <xsl:apply-templates select="xsd:attribute"/>
                 <xsl:apply-templates select="xsd:sequence"/>
-                <xsl:text>    dummy : unit&#10;</xsl:text>
-                <xsl:text>  }&#10;</xsl:text>
+                <xsl:text>    dummy : unit }&#10;</xsl:text>
         </xsl:template>
 
         <xsl:template match="xsd:attribute">

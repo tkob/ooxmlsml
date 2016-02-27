@@ -24,7 +24,16 @@
         </xsl:template>
 
         <xsl:template match="xsd:restriction">
-                <xsl:variable name="t" select="substring-after(@base, ':')"/>
+                <xsl:variable name="t">
+                        <xsl:choose>
+                                <xsl:when test="contains(@base, ':')">
+                                        <xsl:value-of select="substring-after(@base, ':')"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                        <xsl:value-of select="@base"/>
+                                </xsl:otherwise>
+                        </xsl:choose>
+                </xsl:variable>
                 <xsl:choose>
                         <xsl:when test="xsd:enumeration">
                                 <xsl:text>datatype t = </xsl:text>

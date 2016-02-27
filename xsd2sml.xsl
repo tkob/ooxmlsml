@@ -40,25 +40,25 @@
                                 <xsl:apply-templates select="*"/>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:string'">
-                                <xsl:text>type t = string</xsl:text>
+                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:hexBinary'">
-                                <xsl:text>type t = string</xsl:text>
+                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:token'">
-                                <xsl:text>type t = string</xsl:text>
+                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:NCName'">
-                                <xsl:text>type t = string</xsl:text>
+                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:integer'">
-                                <xsl:text>type t = string</xsl:text>
+                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:unsignedInt'">
-                                <xsl:text>type t = string</xsl:text>
+                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:unsignedLong'">
-                                <xsl:text>type t = string</xsl:text>
+                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
                         </xsl:when>
                         <xsl:otherwise>
                                 <xsl:text>type t = </xsl:text>
@@ -70,7 +70,7 @@
         </xsl:template>
 
         <xsl:template match="xsd:union">
-                <xsl:text>type t = string&#10;</xsl:text>
+                <xsl:text>type t = string (* xsd:union *)&#10;</xsl:text>
         </xsl:template>
 
         <xsl:template match="xsd:list">

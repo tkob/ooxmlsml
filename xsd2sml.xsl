@@ -43,22 +43,22 @@
                                 <xsl:text>type t = string (* xsd:string *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:hexBinary'">
-                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:hexBinary *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:token'">
-                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:token *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:NCName'">
-                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:NCName *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:integer'">
-                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:integer *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:unsignedInt'">
-                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:unsignedInt *)</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:unsignedLong'">
-                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:unsignedLong *)</xsl:text>
                         </xsl:when>
                         <xsl:otherwise>
                                 <xsl:text>type t = </xsl:text>

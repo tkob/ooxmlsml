@@ -178,15 +178,7 @@
                                 <xsl:text>.t</xsl:text>
                         </xsl:otherwise>
                 </xsl:choose>
-                <!--
-                <xsl:choose>
-                        <xsl:when test="position() != last()">
-                -->
-                                <xsl:text>,</xsl:text>
-                <!--
-                        </xsl:when>
-                </xsl:choose>
-                -->
+                <xsl:text>,</xsl:text>
                 <xsl:text>&#10;</xsl:text>
         </xsl:template>
 

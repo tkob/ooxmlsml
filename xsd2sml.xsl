@@ -364,9 +364,9 @@
                 </xsl:variable>
                 <xsl:text>          </xsl:text>
                 <xsl:value-of select="$fieldName"/>
-                <xsl:text> = node |> getAttrNS (main, "</xsl:text>
+                <xsl:text> = node |> getAttr "</xsl:text>
                 <xsl:value-of select="$fieldName"/>
-                <xsl:text>")</xsl:text>
+                <xsl:text>"</xsl:text>
                 <xsl:choose>
                         <xsl:when test="(count(@use) = 0 or @use != 'required') and count(@default) > 0">
                                 <xsl:text> |> (fn x => Option.getOpt (SOME x, SOME "</xsl:text>

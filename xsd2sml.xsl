@@ -406,10 +406,14 @@
                 </xsl:choose>
                 <xsl:choose>
                         <xsl:when test="(count(@use) = 0 or @use != 'required') and count(@default) > 0">
-                                <xsl:text> |> Option.valOf</xsl:text>
+                                <xsl:text> |> Option.valOf handle Option => raise Fail "</xsl:text>
+                                <xsl:value-of select="$fieldName"/>
+                                <xsl:text> required"</xsl:text>
                         </xsl:when>
                         <xsl:when test="@use = 'required'">
-                                <xsl:text> |> Option.valOf</xsl:text>
+                                <xsl:text> |> Option.valOf handle Option => raise Fail "</xsl:text>
+                                <xsl:value-of select="$fieldName"/>
+                                <xsl:text> required"</xsl:text>
                         </xsl:when>
                 </xsl:choose>
                 <xsl:text>,</xsl:text>

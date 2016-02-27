@@ -369,9 +369,9 @@
                 <xsl:text>"</xsl:text>
                 <xsl:choose>
                         <xsl:when test="(count(@use) = 0 or @use != 'required') and count(@default) > 0">
-                                <xsl:text> |> (fn x => Option.getOpt (SOME x, SOME "</xsl:text>
+                                <xsl:text> |> (fn x => Option.getOpt (x, "</xsl:text>
                                 <xsl:value-of select="@default"/>
-                                <xsl:text>"))</xsl:text>
+                                <xsl:text>")) |> SOME</xsl:text>
                         </xsl:when>
                 </xsl:choose>
                 <xsl:choose>

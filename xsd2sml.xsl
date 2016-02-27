@@ -18,6 +18,8 @@
                                 <xsl:apply-templates select="xsd:complexType"/>
                                 <xsl:text>&#10;</xsl:text>
                                 <xsl:apply-templates select="xsd:complexType" mode="fromNode"/>
+                                <xsl:text>&#10;</xsl:text>
+                                <xsl:apply-templates select="xsd:element" mode="topLevel"/>
                                 <xsl:text>end&#10;</xsl:text>
                         </xsl:when>
                 </xsl:choose>
@@ -485,6 +487,61 @@
                 </xsl:choose>
                 <xsl:text>,</xsl:text>
                 <xsl:text>&#10;</xsl:text>
+        </xsl:template>
+
+        <xsl:template match="xsd:element" mode="topLevel">
+                <xsl:variable name="t">
+                        <xsl:choose>
+                                <xsl:when test="@type = 'xsd:string'">
+                                        <xsl:text>string</xsl:text>
+                                </xsl:when>
+                                <xsl:when test="contains(@type, ':')">
+                                        <xsl:value-of select="substring-after(@type, ':')"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                        <xsl:value-of select="@type"/>
+                                </xsl:otherwise>
+                        </xsl:choose>
+                </xsl:variable>
+                <xsl:variable name="fieldName">
+                        <xsl:choose>
+                                <xsl:when test="@name = 'val'">
+                                        <xsl:text>value</xsl:text>
+                                </xsl:when>
+                                <xsl:when test="@name = 'type'">
+                                        <xsl:text>typ</xsl:text>
+                                </xsl:when>
+                                <xsl:when test="@name = 'and' or @name = 'local' or @name = 'in' or @name = 'end' or @name = 'tupleCache' or @name = 'odxf' or @name = 'securityDescriptor'">
+                                        <xsl:value-of select="@name"/>
+                                        <xsl:text>'</xsl:text>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                        <xsl:value-of select="@name"/>
+                                </xsl:otherwise>
+                        </xsl:choose>
+                </xsl:variable>
+                <xsl:text>  fun </xsl:text>
+                <xsl:value-of select="$fieldName"/>
+                <xsl:text> doc = doc |> childNS (main, "</xsl:text>
+                <xsl:value-of select="$fieldName"/>
+                <xsl:text>") |> hd</xsl:text>
+                <xsl:choose>
+                        <xsl:when test="$t = 'string'">
+                                <xsl:text> |> getText |> concat</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="starts-with($t, 'ST_')">
+                                <xsl:text> |> getText |> concat |> </xsl:text>
+                                <xsl:value-of select="$t"/>
+                                <xsl:text>.fromString</xsl:text>
+                        </xsl:when>
+                        <xsl:otherwise>
+                                <xsl:text> |> make_</xsl:text>
+                                <xsl:value-of select="$t"/>
+                        </xsl:otherwise>
+                </xsl:choose>
+                <xsl:text> handle Empty => raise Fail "</xsl:text>
+                <xsl:value-of select="$fieldName"/>
+                <xsl:text> element not found"&#10;</xsl:text>
         </xsl:template>
 
 </xsl:stylesheet>

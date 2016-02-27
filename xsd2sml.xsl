@@ -38,35 +38,42 @@
                         <xsl:when test="xsd:enumeration">
                                 <xsl:text>datatype t = </xsl:text>
                                 <xsl:apply-templates select="*"/>
+                                <xsl:text>&#10;</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:string'">
-                                <xsl:text>type t = string (* xsd:string *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:string *)&#10;</xsl:text>
+                                <xsl:text>fun fromString (s : string) : t = s&#10;</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:hexBinary'">
-                                <xsl:text>type t = string (* xsd:hexBinary *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:hexBinary *)&#10;</xsl:text>
+                                <xsl:text>fun fromString (s : string) : t = s&#10;</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:token'">
-                                <xsl:text>type t = string (* xsd:token *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:token *)&#10;</xsl:text>
+                                <xsl:text>fun fromString (s : string) : t = s&#10;</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:NCName'">
-                                <xsl:text>type t = string (* xsd:NCName *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:NCName *)&#10;</xsl:text>
+                                <xsl:text>fun fromString (s : string) : t = s&#10;</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:integer'">
-                                <xsl:text>type t = string (* xsd:integer *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:integer *)&#10;</xsl:text>
+                                <xsl:text>fun fromString (s : string) : t = s&#10;</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:unsignedInt'">
-                                <xsl:text>type t = string (* xsd:unsignedInt *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:unsignedInt *)&#10;</xsl:text>
+                                <xsl:text>fun fromString (s : string) : t = s&#10;</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:unsignedLong'">
-                                <xsl:text>type t = string (* xsd:unsignedLong *)</xsl:text>
+                                <xsl:text>type t = string (* xsd:unsignedLong *)&#10;</xsl:text>
+                                <xsl:text>fun fromString (s : string) : t = s&#10;</xsl:text>
                         </xsl:when>
                         <xsl:otherwise>
                                 <xsl:text>type t = </xsl:text>
                                 <xsl:value-of select="$t"/>
-                                <xsl:text>.t</xsl:text>
+                                <xsl:text>.t&#10;</xsl:text>
                         </xsl:otherwise>
                 </xsl:choose>
-                <xsl:text>&#10;</xsl:text>
         </xsl:template>
 
         <xsl:template match="xsd:union">

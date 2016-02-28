@@ -1,0 +1,7 @@
+<Types
+   xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+   <Default Extension="txt" ContentType="text/plain" />
+   <Default Extension="jpeg" ContentType="image/jpeg" />
+   <Default Extension="picture" ContentType="image/gif" />
+   <Override PartName="/a/b/sample4.picture" ContentType="image/jpeg" />
+</Types>

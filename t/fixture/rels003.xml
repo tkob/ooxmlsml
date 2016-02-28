@@ -1,0 +1,11 @@
+<Relationships
+   xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+   <Relationship
+      Target="./Signature.xml"
+      Id="A5FFC797514BC"
+      Type="http://schemas.openxmlformats.org/package/2006/relationships/digital-signature/signature"/>
+   <Relationship
+      Target="./Signature.xml"
+      Id="B5F32797CC4B7"
+      Type="http://www.custom.com/internal-resource"/>
+</Relationships>

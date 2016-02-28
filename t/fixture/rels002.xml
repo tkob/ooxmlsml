@@ -1,0 +1,13 @@
+<Relationships
+   xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+   <Relationship
+      TargetMode="External"
+      Id="A9EFC627517BC"
+      Target="http://www.custom.com/images/pic1.jpg"
+      Type="http://www.custom.com/external-resource"/>
+   <Relationship
+      TargetMode="External"
+      Id="A5EFC797514BC"
+      Target="./images/my_house.jpg"
+      Type="http://www.custom.com/external-resource"/>
+</Relationships>

@@ -12,6 +12,7 @@
                                 <xsl:text>  open UXML.Path&#10;</xsl:text>
                                 <xsl:text>  infix |>&#10;</xsl:text>
                                 <xsl:text>  val main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"&#10;</xsl:text>
+                                <xsl:text>  val r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"&#10;</xsl:text>
                                 <xsl:text>  fun flatMap f NONE = NONE | flatMap f (SOME v) = f v&#10;</xsl:text>
                                 <xsl:text>  fun toBool "true" = SOME true | toBool "false" = SOME false | toBool "1" = SOME true | toBool "0" = SOME false | toBool _ = NONE&#10;</xsl:text>
                                 <xsl:text>&#10;</xsl:text>
@@ -333,6 +334,15 @@
         </xsl:template>
 
         <xsl:template match="xsd:attribute" mode="fromNode">
+                <xsl:variable name="nsprefix">
+                        <xsl:choose>
+                                <xsl:when test="contains(@ref, ':')">
+                                        <xsl:value-of select="substring-before(@ref, ':')"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                </xsl:otherwise>
+                        </xsl:choose>
+                </xsl:variable>
                 <xsl:variable name="t">
                         <xsl:choose>
                                 <xsl:when test="contains(@type, ':')">
@@ -365,9 +375,20 @@
                 </xsl:variable>
                 <xsl:text>          </xsl:text>
                 <xsl:value-of select="$fieldName"/>
-                <xsl:text> = node |> getAttr "</xsl:text>
-                <xsl:value-of select="$fieldName"/>
-                <xsl:text>"</xsl:text>
+                <xsl:choose>
+                        <xsl:when test="$nsprefix != ''">
+                                <xsl:text> = node |> getAttrNS (</xsl:text>
+                                <xsl:value-of select="$nsprefix"/>
+                                <xsl:text>, "</xsl:text>
+                                <xsl:value-of select="$fieldName"/>
+                                <xsl:text>")</xsl:text>
+                        </xsl:when>
+                        <xsl:otherwise>
+                                <xsl:text> = node |> getAttr "</xsl:text>
+                                <xsl:value-of select="$fieldName"/>
+                                <xsl:text>"</xsl:text>
+                        </xsl:otherwise>
+                </xsl:choose>
                 <xsl:choose>
                         <xsl:when test="(count(@use) = 0 or @use != 'required') and count(@default) > 0">
                                 <xsl:text> |> (fn x => Option.getOpt (x, "</xsl:text>

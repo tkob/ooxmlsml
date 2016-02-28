@@ -1,0 +1,15 @@
+Group
+  structure IRI
+  structure PartName
+  structure ContentType
+  structure Opc
+  structure Relationship
+  structure ContentTypeStream
+  structure ZipPackage
+  structure ZipNavigator
+is
+  $/basis.cm
+  $SMACKAGE/uxml/v0.1.0/uxml.cm
+  $SMACKAGE/smlzip/v0.1.0/pkzip.cm
+
+  opc.sml

@@ -1,3 +1,34 @@
+structure ColumnName :> sig
+  type t
+  val toInt : t -> int
+  val fromInt : int -> t
+  val toString : t -> string
+  val fromString : string -> t
+end = struct
+  type t = int
+
+  fun toInt v = v
+  fun fromInt i =
+        if i > 0 then i
+        else raise Fail ("should be > 0 but got " ^ Int.toString i)
+
+  fun toString v =
+        let
+          fun f (0, cs) = implode cs
+            | f (v, cs) =
+                let
+                  val v = v - 1
+                  val c = Char.chr (Int.rem (v, 26) + 65)
+                in
+                  f (Int.quot (v, 26), c::cs)
+                end
+        in
+          f (v, [])
+        end
+
+  fun fromString s = raise Fail "unimplemented"
+end
+
 structure SpreadSheet = struct
   val officeDocument = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
   val sharedStrings = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"

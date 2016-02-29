@@ -8,7 +8,15 @@ structure SpreadSheet = struct
   fun rstToString (CT.CT_Rst {t, r, ...}) =
         Option.getOpt (t, "") ^ concat (map reltToString r)
 
-  structure Worksheet = struct
+  structure Worksheet :> sig
+    type t
+    val fromNav : ZipNavigator.navigator * CT.CT_Rst Vector.vector -> t
+  end
+  where type t = {
+      nav : ZipNavigator.navigator,
+      worksheet : CT.CT_Worksheet,
+      sharedStrings : CT.CT_Rst Vector.vector }
+  = struct
     type t = {
       nav : ZipNavigator.navigator,
       worksheet : CT.CT_Worksheet,

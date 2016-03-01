@@ -12,15 +12,18 @@ end = struct
         if i > 0 then i
         else raise Fail ("should be > 0 but got " ^ Int.toString i)
 
+  val largeA = Char.ord #"A"
+  val numAlphas = Char.ord #"Z" - Char.ord #"A" + 1
+
   fun toString v =
         let
           fun f (0, cs) = implode cs
             | f (v, cs) =
                 let
                   val v = v - 1
-                  val c = Char.chr (Int.rem (v, 26) + 65)
+                  val c = Char.chr (Int.rem (v, numAlphas) + largeA)
                 in
-                  f (Int.quot (v, 26), c::cs)
+                  f (Int.quot (v, numAlphas), c::cs)
                 end
         in
           f (v, [])
@@ -31,9 +34,9 @@ end = struct
           fun f ([], sum) = sum
             | f (c::cs, sum) =
                 let
-                  val i = Char.ord c - 65 + 1
+                  val i = Char.ord c - largeA + 1
                 in
-                  f (cs, sum * 26 + i)
+                  f (cs, sum * numAlphas + i)
                 end
         in
           f (explode s, 0)

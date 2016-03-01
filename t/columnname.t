@@ -1,9 +1,14 @@
-# fromInt
+# Setup
 
 ```
 - CM.make "spreadsheet.cm";
 ...
 val it = true : bool
+```
+
+# toString
+
+```
 - ColumnName.toString (ColumnName.fromInt 1);
 val it = "A" : string
 - ColumnName.toString (ColumnName.fromInt 26);

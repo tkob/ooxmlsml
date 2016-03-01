@@ -26,7 +26,18 @@ end = struct
           f (v, [])
         end
 
-  fun fromString s = raise Fail "unimplemented"
+  fun fromString s =
+        let
+          fun f ([], sum) = sum
+            | f (c::cs, sum) =
+                let
+                  val i = Char.ord c - 65 + 1
+                in
+                  f (cs, sum * 26 + i)
+                end
+        in
+          f (explode s, 0)
+        end
 end
 
 structure SpreadSheet = struct

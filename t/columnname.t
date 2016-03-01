@@ -26,16 +26,17 @@ val it = "XFD" : string
 # fromString
 
 ```
-- ColumnName.toInt (ColumnName.fromString "A");
-val it = 1 : int
-- ColumnName.toInt (ColumnName.fromString "Z");
-val it = 26 : int
-- ColumnName.toInt (ColumnName.fromString "AA");
-val it = 27 : int
-- ColumnName.toInt (ColumnName.fromString "AZ");
-val it = 52 : int
-- ColumnName.toInt (ColumnName.fromString "BA");
-val it = 53 : int
-- ColumnName.toInt (ColumnName.fromString "XFD");
-val it = 16384 : int
+- Option.map ColumnName.toInt (ColumnName.fromString "A");
+...
+val it = SOME 1 : int option
+- Option.map ColumnName.toInt (ColumnName.fromString "Z");
+val it = SOME 26 : int option
+- Option.map ColumnName.toInt (ColumnName.fromString "AA");
+val it = SOME 27 : int option
+- Option.map ColumnName.toInt (ColumnName.fromString "AZ");
+val it = SOME 52 : int option
+- Option.map ColumnName.toInt (ColumnName.fromString "BA");
+val it = SOME 53 : int option
+- Option.map ColumnName.toInt (ColumnName.fromString "XFD");
+val it = SOME 16384 : int option
 ```

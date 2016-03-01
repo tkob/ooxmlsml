@@ -3,7 +3,7 @@ structure ColumnName :> sig
   val toInt : t -> int
   val fromInt : int -> t
   val toString : t -> string
-  val fromString : string -> t
+  val fromString : string -> t option
 end = struct
   type t = int
 
@@ -31,12 +31,15 @@ end = struct
 
   fun fromString s =
         let
-          fun f ([], sum) = sum
+          fun f ([], sum) = SOME sum
             | f (c::cs, sum) =
                 let
                   val i = Char.ord c - largeA + 1
                 in
-                  f (cs, sum * numAlphas + i)
+                  if i < 1 orelse i > numAlphas then
+                    NONE
+                  else
+                    f (cs, sum * numAlphas + i)
                 end
         in
           f (explode s, 0)

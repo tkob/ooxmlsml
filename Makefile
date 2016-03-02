@@ -16,9 +16,11 @@ part4.zip:
 
 OfficeOpenXML-XMLSchema-Transitional.zip: part4.zip
 	unzip part4.zip OfficeOpenXML-XMLSchema-Transitional.zip
+	touch OfficeOpenXML-XMLSchema-Transitional.zip
 
 xsd: OfficeOpenXML-XMLSchema-Transitional.zip
 	unzip -u -d xsd OfficeOpenXML-XMLSchema-Transitional.zip
+	touch xsd
 
 %.t: %.t.in
 	autom4te -l m4sugar -o $@ $<

@@ -42,7 +42,8 @@ end = struct
                     f (cs, sum * numAlphas + i)
                 end
         in
-          f (explode s, 0)
+          if s = "" then NONE
+          else f (explode s, 0)
         end
 end
 

@@ -40,3 +40,10 @@ val it = SOME 53 : int option
 - Option.map ColumnName.toInt (ColumnName.fromString "XFD");
 val it = SOME 16384 : int option
 ```
+
+# invalid column name
+
+```
+- ColumnName.fromString "";
+val it = NONE : ColumnName.t option
+```

@@ -47,6 +47,40 @@ end = struct
         end
 end
 
+structure CellRef :> sig
+  type t
+  val column : t -> ColumnName.t
+  val row : t -> int
+  val toString : t -> string
+  val fromString : string -> t option
+end = struct
+  type t = {column : ColumnName.t, row : int}
+
+  fun column {column, row} = column
+  fun row {column, row} = row
+
+  fun toString {column, row} =
+        ColumnName.toString column ^ Int.toString row
+  fun fromString s =
+        let
+          val (column, s') = Substring.splitl Char.isAlpha (Substring.full s)
+          val (row, s'') = Substring.splitl Char.isDigit s'
+        in
+          if Substring.size s'' > 0 then NONE
+          else
+            let
+              val column = ColumnName.fromString (Substring.string column)
+              val row = Int.fromString (Substring.string row)
+            in
+              case (column, row) of
+                   (SOME column, SOME row) =>
+                     if row <= 0 then NONE
+                     else SOME {column = column, row = row}
+                 | _ => NONE
+            end
+        end
+end
+
 structure SpreadSheet = struct
   val officeDocument = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
   val sharedStrings = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"

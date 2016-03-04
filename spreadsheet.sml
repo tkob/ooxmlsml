@@ -81,6 +81,42 @@ end = struct
         end
 end
 
+structure Ref :> sig
+  type t
+  val top : t -> int
+  val bottom : t -> int
+  val left : t -> ColumnName.t
+  val right : t -> ColumnName.t
+  val toString : t -> string
+  val fromString : string -> t option
+end = struct
+  type t = CellRef.t * CellRef.t
+
+  fun top (topLeft, _) = CellRef.row topLeft
+  fun bottom (_, bottomRight) = CellRef.row bottomRight
+  fun left (topLeft, _) = CellRef.column topLeft
+  fun right (_, bottomRight) = CellRef.column bottomRight
+
+  fun toString (topLeft, rightBottom) =
+        CellRef.toString topLeft ^ ":" ^ CellRef.toString rightBottom
+  fun fromString s =
+        let
+          val cellRefs = String.fields (fn c => c = #":") s
+        in
+          if length cellRefs <> 2 then NONE
+          else
+            let
+              val topLeft = CellRef.fromString (List.nth (cellRefs, 0))
+              val rightBottom = CellRef.fromString (List.nth (cellRefs, 1))
+            in
+              case (topLeft, rightBottom) of
+                   (SOME topLeft, SOME rightBottom) =>
+                     SOME (topLeft, rightBottom)
+                 | _ => NONE
+            end
+        end
+end
+
 structure SpreadSheet = struct
   val officeDocument = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
   val sharedStrings = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"

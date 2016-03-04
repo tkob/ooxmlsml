@@ -1,5 +1,6 @@
 Group
   structure ColumnName
+  structure CellRef
   structure SpreadSheet
   structure CT
 is

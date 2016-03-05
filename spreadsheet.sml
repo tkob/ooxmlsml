@@ -1,5 +1,5 @@
 structure ColumnName :> sig
-  type t
+  eqtype t
   val toInt : t -> int
   val fromInt : int -> t
   val toString : t -> string
@@ -48,7 +48,7 @@ end = struct
 end
 
 structure CellRef :> sig
-  type t
+  eqtype t
   val column : t -> ColumnName.t
   val row : t -> int
   val toString : t -> string
@@ -82,7 +82,7 @@ end = struct
 end
 
 structure Ref :> sig
-  type t
+  eqtype t
   val top : t -> int
   val bottom : t -> int
   val left : t -> ColumnName.t

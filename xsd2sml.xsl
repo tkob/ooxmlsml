@@ -104,10 +104,17 @@
         </xsl:template>
 
         <xsl:template match="xsd:list">
-                <xsl:text>type t = </xsl:text>
+                <xsl:text>  type t = </xsl:text>
                 <xsl:value-of select="@itemType"/>
                 <xsl:text>.t list&#10;</xsl:text>
-                <xsl:text>fun fromString s = raise Fail "unimplemented"&#10;</xsl:text>
+                <xsl:text>  fun fromString s =&#10;</xsl:text>
+                <xsl:text>        let&#10;</xsl:text>
+                <xsl:text>          val tokens = String.tokens Char.isSpace s&#10;</xsl:text>
+                <xsl:text>        in&#10;</xsl:text>
+                <xsl:text>          map </xsl:text>
+                <xsl:value-of select="@itemType"/>
+                <xsl:text>.fromString tokens&#10;</xsl:text>
+                <xsl:text>        end&#10;</xsl:text>
         </xsl:template>
 
         <xsl:template match="xsd:enumeration">

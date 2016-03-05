@@ -159,7 +159,7 @@ structure SpreadSheet = struct
     val closeIn : t -> unit
     val worksheets : t -> Worksheet.t list
     val worksheetById : t -> string -> Worksheet.t
-    val worksheetBySheetId : t -> string -> Worksheet.t option
+    val worksheetBySheetId : t -> LargeWord.word -> Worksheet.t option
     val worksheetByName : t -> string -> Worksheet.t option
   end
   where type t = { package : ZipPackage.package,

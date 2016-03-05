@@ -15,6 +15,7 @@
                                 <xsl:text>  val r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"&#10;</xsl:text>
                                 <xsl:text>  fun flatMap f NONE = NONE | flatMap f (SOME v) = f v&#10;</xsl:text>
                                 <xsl:text>  fun toBool "true" = SOME true | toBool "false" = SOME false | toBool "1" = SOME true | toBool "0" = SOME false | toBool _ = NONE&#10;</xsl:text>
+                                <xsl:text>  fun toLargeWord s = LargeWord.fromString (Substring.string (Substring.dropl (fn #"+" => true | _ => false) (Substring.full s)))&#10;</xsl:text>
                                 <xsl:text>&#10;</xsl:text>
                                 <xsl:apply-templates select="xsd:complexType"/>
                                 <xsl:text>&#10;</xsl:text>
@@ -79,8 +80,8 @@
                                 <xsl:text>  fun fromString (s : string) : t = s&#10;</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:unsignedInt'">
-                                <xsl:text>  type t = string (* xsd:unsignedInt *)&#10;</xsl:text>
-                                <xsl:text>  fun fromString (s : string) : t = s&#10;</xsl:text>
+                                <xsl:text>  type t = LargeWord.word (* xsd:unsignedInt *)&#10;</xsl:text>
+                                <xsl:text>  fun fromString (s : string) : t = Option.valOf (LargeWord.fromString s)&#10;</xsl:text>
                         </xsl:when>
                         <xsl:when test="@base = 'xsd:unsignedLong'">
                                 <xsl:text>  type t = string (* xsd:unsignedLong *)&#10;</xsl:text>
@@ -230,7 +231,7 @@
                                 <xsl:text>string</xsl:text>
                         </xsl:when>
                         <xsl:when test="@type = 'xsd:unsignedInt'">
-                                <xsl:text>string</xsl:text>
+                                <xsl:text>LargeWord.word</xsl:text>
                         </xsl:when>
                         <xsl:when test="@type = 'xsd:unsignedShort'">
                                 <xsl:text>string</xsl:text>
@@ -411,6 +412,7 @@
                         <xsl:when test="@type = 'xsd:int'">
                         </xsl:when>
                         <xsl:when test="@type = 'xsd:unsignedInt'">
+                                <xsl:text> |> flatMap toLargeWord</xsl:text>
                         </xsl:when>
                         <xsl:when test="@type = 'xsd:unsignedShort'">
                         </xsl:when>

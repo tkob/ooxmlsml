@@ -4,6 +4,7 @@ structure ColumnName :> sig
   val fromInt : int -> t
   val toString : t -> string
   val fromString : string -> t option
+  val next : t -> t
 end = struct
   type t = int
 
@@ -45,6 +46,8 @@ end = struct
           if s = "" then NONE
           else f (explode s, 0)
         end
+
+  fun next v = v + 1
 end
 
 structure CellRef :> sig

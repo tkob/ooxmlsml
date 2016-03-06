@@ -140,27 +140,22 @@ structure SpreadSheet = struct
   val main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
   val r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 
-  structure Cell :> sig
-    datatype value = Empty
-                   | Boolean of bool
-                   | Number of string
-                   | Error of string
-                   | String of RichString.t
-                   | Formula of CT.CT_CellFormula
-    type cell = { value : value }
+  structure CellValue :> sig
+    datatype t = Empty
+               | Boolean of bool
+               | Number of string
+               | Error of string
+               | String of RichString.t
+               | Formula of CT.CT_CellFormula
 
-    val value : cell -> value
-    val toString : value -> string
+    val toString : t -> string
   end = struct
-    datatype value = Empty
-                   | Boolean of bool
-                   | Number of string
-                   | Error of string
-                   | String of RichString.t
-                   | Formula of CT.CT_CellFormula
-    type cell = { value : value }
-
-    fun value {value} = value
+    datatype t = Empty
+               | Boolean of bool
+               | Number of string
+               | Error of string
+               | String of RichString.t
+               | Formula of CT.CT_CellFormula
 
     fun toString Empty = ""
       | toString (Boolean boolean) = Bool.toString boolean
@@ -170,11 +165,23 @@ structure SpreadSheet = struct
       | toString (Formula (CT.CT_CellFormula {content, ...})) = content
   end
 
+  structure Cell :> sig
+    type t = { value : CellValue.t }
+
+    val value : t -> CellValue.t
+    val toString : t -> string
+  end = struct
+    type t = { value : CellValue.t }
+
+    fun value {value} = value
+    fun toString {value} = CellValue.toString value
+  end
+
   structure Worksheet :> sig
     type t
     val fromNav : ZipNavigator.navigator * CT.CT_Rst Vector.vector -> t
-    val cell : t -> CellRef.t -> Cell.cell
-    val cellValue : t -> CellRef.t -> Cell.value
+    val cell : t -> CellRef.t -> Cell.t
+    val cellValue : t -> CellRef.t -> CellValue.t
   end
   where type t = {
       nav : ZipNavigator.navigator,
@@ -235,13 +242,13 @@ structure SpreadSheet = struct
             val row = List.find (fn (num, _) => num = rowRef) (renumRows rows)
           in
             case row of
-                 NONE => { value = Cell.Empty }
+                 NONE => { value = CellValue.Empty }
                | SOME (_, CT.CT_Row {c = cells, ...}) =>
                    let
                      val cell = List.find (fn (num, _) => num = columnRef) (renumCells cells)
                    in
                      case cell of
-                          NONE => { value = Cell.Empty }
+                          NONE => { value = CellValue.Empty }
                         | SOME (_, CT.CT_Cell {t, f, v, is, ...}) =>
                             case t of
                                  ST_CellType.b =>
@@ -249,23 +256,23 @@ structure SpreadSheet = struct
                                      val v = Option.valOf v
                                      val boolean = Option.valOf (CT.toBool v)
                                    in
-                                     { value = Cell.Boolean boolean }
+                                     { value = CellValue.Boolean boolean }
                                    end
                                | ST_CellType.n =>
-                                   { value = Cell.Number (Option.valOf v) }
+                                   { value = CellValue.Number (Option.valOf v) }
                                | ST_CellType.e =>
-                                   { value = Cell.Error (Option.valOf v) }
+                                   { value = CellValue.Error (Option.valOf v) }
                                | ST_CellType.s =>
                                    let
                                      val v = Option.valOf v
                                      val index = Option.valOf (Int.fromString v)
                                    in
-                                     { value = Cell.String (Vector.sub (sharedStrings, index)) }
+                                     { value = CellValue.String (Vector.sub (sharedStrings, index)) }
                                    end
                                | ST_CellType.str =>
-                                   { value = Cell.Formula (Option.valOf f) }
+                                   { value = CellValue.Formula (Option.valOf f) }
                                | ST_CellType.inlineStr =>
-                                   { value = Cell.String (Option.valOf is) }
+                                   { value = CellValue.String (Option.valOf is) }
                    end
           end
 

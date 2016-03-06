@@ -167,7 +167,7 @@ structure SpreadSheet = struct
       | toString (Number number) = number
       | toString (Error error) = error
       | toString (String string) = RichString.toString string
-      | toString (Formula formula) = raise Fail "unimplemented"
+      | toString (Formula (CT.CT_CellFormula {content, ...})) = content
   end
 
   structure Worksheet :> sig

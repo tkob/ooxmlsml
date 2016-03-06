@@ -134,8 +134,8 @@ where type t = CT.CT_Rst
   val toString = rstToString
 end
 
-structure SpreadSheet = struct
-  structure CellValue :> sig
+structure SpreadSheet :> sig
+  structure CellValue : sig
     datatype t = Empty
                | Boolean of bool
                | Number of string
@@ -145,7 +145,41 @@ structure SpreadSheet = struct
 
     val toString : t -> string
     val toInt : t -> int
-  end = struct
+  end
+
+  structure Cell : sig
+    type t = { value : CellValue.t }
+
+    val value : t -> CellValue.t
+    val toString : t -> string
+  end
+
+  structure Worksheet : sig
+    type t
+    val fromNav : ZipNavigator.navigator * CT.CT_Rst Vector.vector -> t
+    val cell : t -> CellRef.t -> Cell.t
+    val cellValue : t -> CellRef.t -> CellValue.t
+  end
+  where type t = { nav : ZipNavigator.navigator,
+                   worksheet : CT.CT_Worksheet,
+                   sharedStrings : CT.CT_Rst Vector.vector }
+
+  structure Workbook : sig
+    type t
+    val openIn : string -> t
+    val closeIn : t -> unit
+    val worksheets : t -> Worksheet.t list
+    val worksheetById : t -> string -> Worksheet.t
+    val worksheetBySheetId : t -> LargeWord.word -> Worksheet.t option
+    val worksheetByName : t -> string -> Worksheet.t option
+  end
+  where type t = { package : ZipPackage.package,
+                   nav : ZipNavigator.navigator,
+                   workbook : CT.CT_Workbook,
+                   sharedStrings : CT.CT_Rst Vector.vector }
+
+end = struct
+  structure CellValue = struct
     datatype t = Empty
                | Boolean of bool
                | Number of string
@@ -171,29 +205,14 @@ structure SpreadSheet = struct
       | toInt (Formula _) = 0
   end
 
-  structure Cell :> sig
-    type t = { value : CellValue.t }
-
-    val value : t -> CellValue.t
-    val toString : t -> string
-  end = struct
+  structure Cell = struct
     type t = { value : CellValue.t }
 
     fun value {value} = value
     fun toString {value} = CellValue.toString value
   end
 
-  structure Worksheet :> sig
-    type t
-    val fromNav : ZipNavigator.navigator * CT.CT_Rst Vector.vector -> t
-    val cell : t -> CellRef.t -> Cell.t
-    val cellValue : t -> CellRef.t -> CellValue.t
-  end
-  where type t = {
-      nav : ZipNavigator.navigator,
-      worksheet : CT.CT_Worksheet,
-      sharedStrings : CT.CT_Rst Vector.vector }
-  = struct
+  structure Worksheet = struct
     type t = {
       nav : ZipNavigator.navigator,
       worksheet : CT.CT_Worksheet,
@@ -292,20 +311,7 @@ structure SpreadSheet = struct
           end
   end
 
-  structure Workbook :> sig
-    type t
-    val openIn : string -> t
-    val closeIn : t -> unit
-    val worksheets : t -> Worksheet.t list
-    val worksheetById : t -> string -> Worksheet.t
-    val worksheetBySheetId : t -> LargeWord.word -> Worksheet.t option
-    val worksheetByName : t -> string -> Worksheet.t option
-  end
-  where type t = { package : ZipPackage.package,
-                   nav : ZipNavigator.navigator,
-                   workbook : CT.CT_Workbook,
-                   sharedStrings : CT.CT_Rst Vector.vector }
-  = struct
+  structure Workbook = struct
     type t = {
       package : ZipPackage.package,
       nav : ZipNavigator.navigator,

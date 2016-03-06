@@ -180,7 +180,9 @@
                 <xsl:value-of select="@name"/>
                 <xsl:text> of {&#10;</xsl:text>
                 <xsl:apply-templates select="xsd:attribute"/>
+                <xsl:apply-templates select="xsd:simpleContent/xsd:extension/xsd:attribute"/>
                 <xsl:apply-templates select="xsd:sequence"/>
+                <xsl:apply-templates select="xsd:simpleContent/xsd:extension"/>
                 <xsl:text>    dummy : unit }&#10;</xsl:text>
         </xsl:template>
 
@@ -266,6 +268,22 @@
                 <xsl:text>&#10;</xsl:text>
         </xsl:template>
 
+        <xsl:template match="xsd:extension">
+                <xsl:variable name="t">
+                        <xsl:choose>
+                                <xsl:when test="contains(@base, ':')">
+                                        <xsl:value-of select="substring-after(@base, ':')"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                        <xsl:value-of select="@base"/>
+                                </xsl:otherwise>
+                        </xsl:choose>
+                </xsl:variable>
+                <xsl:text>    content : </xsl:text>
+                <xsl:value-of select="$t"/>
+                <xsl:text>.t,&#10;</xsl:text>
+        </xsl:template>
+
         <xsl:template match="xsd:sequence">
                 <xsl:apply-templates select="xsd:element[@name != '']"/>
         </xsl:template>
@@ -337,7 +355,9 @@
                 <xsl:value-of select="@name"/>
                 <xsl:text> {&#10;</xsl:text>
                 <xsl:apply-templates select="xsd:attribute" mode="fromNode"/>
+                <xsl:apply-templates select="xsd:simpleContent/xsd:extension/xsd:attribute" mode="fromNode"/>
                 <xsl:apply-templates select="xsd:sequence" mode="fromNode"/>
+                <xsl:apply-templates select="xsd:simpleContent/xsd:extension" mode="fromNode"/>
                 <xsl:text>          dummy = () }&#10;</xsl:text>
         </xsl:template>
 
@@ -449,6 +469,23 @@
                 </xsl:choose>
                 <xsl:text>,</xsl:text>
                 <xsl:text>&#10;</xsl:text>
+        </xsl:template>
+
+        <xsl:template match="xsd:extension" mode="fromNode">
+                <xsl:variable name="t">
+                        <xsl:choose>
+                                <xsl:when test="contains(@base, ':')">
+                                        <xsl:value-of select="substring-after(@base, ':')"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                        <xsl:value-of select="@base"/>
+                                </xsl:otherwise>
+                        </xsl:choose>
+                </xsl:variable>
+                <xsl:text>          content = node |> getText |> concat |> </xsl:text>
+                <xsl:value-of select="$t"/>
+                <xsl:text>.fromString</xsl:text>
+                <xsl:text>,&#10;</xsl:text>
         </xsl:template>
 
         <xsl:template match="xsd:sequence" mode="fromNode">

@@ -2,7 +2,6 @@ Group
   structure ColumnName
   structure CellRef
   structure Ref
-  structure RichString
   structure SpreadSheet
   structure CT
 is

@@ -16,34 +16,26 @@ val it = true : bool
 - SpreadSheet.Worksheet.cell (Option.valOf ws) (Option.valOf (CellRef.fromString "A1"));
 [autoloading]
 [autoloading done]
-val it =
-  {value=String (CT_Rst {dummy=(),phoneticPr=NONE,r=[#,#,#],rPh=[],t=NONE})}
-  : SpreadSheet.Cell.t
+val it = {value=String -} : SpreadSheet.Cell.t
 ```
 
 # read
 
 ```
 - SpreadSheet.Worksheet.cell (Option.valOf ws) (Option.valOf (CellRef.fromString "C2"));
-val it =
-  {value=String (CT_Rst {dummy=(),phoneticPr=SOME #,r=[],rPh=[],t=SOME #})}
-  : SpreadSheet.Cell.t
+val it = {value=String -} : SpreadSheet.Cell.t
 ```
 
 # read
 
 ```
 - SpreadSheet.Worksheet.cell (Option.valOf ws) (Option.valOf (CellRef.fromString "B4"));
-val it =
-  {value=String (CT_Rst {dummy=(),phoneticPr=SOME #,r=[],rPh=[],t=SOME #})}
-  : SpreadSheet.Cell.t
+val it = {value=String -} : SpreadSheet.Cell.t
 ```
 
 # read
 
 ```
 - SpreadSheet.Worksheet.cell (Option.valOf ws) (Option.valOf (CellRef.fromString "D2"));
-val it =
-  {value=String (CT_Rst {dummy=(),phoneticPr=SOME #,r=[],rPh=[],t=SOME #})}
-  : SpreadSheet.Cell.t
+val it = {value=String -} : SpreadSheet.Cell.t
 ```

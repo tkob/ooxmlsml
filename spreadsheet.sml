@@ -120,21 +120,12 @@ end = struct
         end
 end
 
-structure RichString :> sig
-  type t
-  val toString : t -> string
-end
-where type t = CT.CT_Rst
-= struct
-  type t = CT.CT_Rst
-
-  fun reltToString (CT.CT_RElt {t, ...}) = t
-  fun rstToString (CT.CT_Rst {t, r, ...}) =
-        Option.getOpt (t, "") ^ concat (map reltToString r)
-  val toString = rstToString
-end
-
 structure SpreadSheet :> sig
+  structure RichString : sig
+    type t
+    val toString : t -> string
+  end
+
   structure CellValue : sig
     datatype t = Empty
                | Boolean of bool
@@ -177,8 +168,16 @@ structure SpreadSheet :> sig
                    nav : ZipNavigator.navigator,
                    workbook : CT.CT_Workbook,
                    sharedStrings : CT.CT_Rst Vector.vector }
-
 end = struct
+  structure RichString = struct
+    type t = CT.CT_Rst
+
+    fun reltToString (CT.CT_RElt {t, ...}) = t
+    fun rstToString (CT.CT_Rst {t, r, ...}) =
+          Option.getOpt (t, "") ^ concat (map reltToString r)
+    val toString = rstToString
+  end
+
   structure CellValue = struct
     datatype t = Empty
                | Boolean of bool

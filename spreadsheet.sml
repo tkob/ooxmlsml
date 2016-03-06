@@ -120,19 +120,61 @@ end = struct
         end
 end
 
+structure RichString :> sig
+  type t
+  val toString : t -> string
+end
+where type t = CT.CT_Rst
+= struct
+  type t = CT.CT_Rst
+
+  fun reltToString (CT.CT_RElt {t, ...}) = t
+  fun rstToString (CT.CT_Rst {t, r, ...}) =
+        Option.getOpt (t, "") ^ concat (map reltToString r)
+  val toString = rstToString
+end
+
 structure SpreadSheet = struct
   val officeDocument = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
   val sharedStrings = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"
   val main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
   val r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 
-  fun reltToString (CT.CT_RElt {t, ...}) = t
-  fun rstToString (CT.CT_Rst {t, r, ...}) =
-        Option.getOpt (t, "") ^ concat (map reltToString r)
+  structure Cell :> sig
+    datatype value = Empty
+                   | Boolean of bool
+                   | Number of string
+                   | Error of string
+                   | String of RichString.t
+                   | Formula of CT.CT_CellFormula
+    type cell = { value : value }
+
+    val value : cell -> value
+    val toString : value -> string
+  end = struct
+    datatype value = Empty
+                   | Boolean of bool
+                   | Number of string
+                   | Error of string
+                   | String of RichString.t
+                   | Formula of CT.CT_CellFormula
+    type cell = { value : value }
+
+    fun value {value} = value
+
+    fun toString Empty = ""
+      | toString (Boolean boolean) = Bool.toString boolean
+      | toString (Number number) = number
+      | toString (Error error) = error
+      | toString (String string) = RichString.toString string
+      | toString (Formula formula) = raise Fail "unimplemented"
+  end
 
   structure Worksheet :> sig
     type t
     val fromNav : ZipNavigator.navigator * CT.CT_Rst Vector.vector -> t
+    val cell : t -> CellRef.t -> Cell.cell
+    val cellValue : t -> CellRef.t -> Cell.value
   end
   where type t = {
       nav : ZipNavigator.navigator,
@@ -153,6 +195,85 @@ structure SpreadSheet = struct
             { nav = nav,
               worksheet = worksheet,
               sharedStrings = sharedStrings }
+          end
+
+    fun renumRows rows : (LargeWord.word * CT.CT_Row) list =
+          let
+            fun renum (row as CT.CT_Row {r = NONE, ...}, (num, rows)) =
+                  (LargeWord.+ (num, 0w1), ((num, row)::rows))
+              | renum (row as CT.CT_Row {r = SOME r, ...}, (num, rows)) =
+                  (LargeWord.+ (r, 0w1), ((r, row)::rows))
+            val (_, rows') = List.foldr renum (0w1, []) rows
+          in
+            rows'
+          end
+
+    fun renumCells cells : (ColumnName.t * CT.CT_Cell) list =
+          let
+            fun renum (cell as CT.CT_Cell {r = NONE, ...}, (num, cells)) =
+                  (ColumnName.next num, ((num, cell)::cells))
+              | renum (cell as CT.CT_Cell {r = SOME r, ...}, (num, cells)) =
+                  case CellRef.fromString r of
+                       NONE =>
+                         (ColumnName.next num, ((num, cell)::cells))
+                     | SOME cellRef =>
+                         let
+                           val column = CellRef.column cellRef
+                         in
+                           (ColumnName.next column, ((column, cell)::cells))
+                         end
+            val (_, cells') = List.foldr renum (ColumnName.fromInt 1, []) cells
+          in
+            cells'
+          end
+
+    fun cell {nav, worksheet, sharedStrings} cellRef =
+          let
+            val rowRef = LargeWord.fromInt (CellRef.row cellRef)
+            val columnRef = CellRef.column cellRef
+            val CT.CT_Worksheet {sheetData = CT.CT_SheetData {row = rows, ...}, ...} = worksheet
+            val row = List.find (fn (num, _) => num = rowRef) (renumRows rows)
+          in
+            case row of
+                 NONE => { value = Cell.Empty }
+               | SOME (_, CT.CT_Row {c = cells, ...}) =>
+                   let
+                     val cell = List.find (fn (num, _) => num = columnRef) (renumCells cells)
+                   in
+                     case cell of
+                          NONE => { value = Cell.Empty }
+                        | SOME (_, CT.CT_Cell {t, f, v, is, ...}) =>
+                            case t of
+                                 ST_CellType.b =>
+                                   let
+                                     val v = Option.valOf v
+                                     val boolean = Option.valOf (CT.toBool v)
+                                   in
+                                     { value = Cell.Boolean boolean }
+                                   end
+                               | ST_CellType.n =>
+                                   { value = Cell.Number (Option.valOf v) }
+                               | ST_CellType.e =>
+                                   { value = Cell.Error (Option.valOf v) }
+                               | ST_CellType.s =>
+                                   let
+                                     val v = Option.valOf v
+                                     val index = Option.valOf (Int.fromString v)
+                                   in
+                                     { value = Cell.String (Vector.sub (sharedStrings, index)) }
+                                   end
+                               | ST_CellType.str =>
+                                   { value = Cell.Formula (Option.valOf f) }
+                               | ST_CellType.inlineStr =>
+                                   { value = Cell.String (Option.valOf is) }
+                   end
+          end
+
+    fun cellValue worksheet cellRef =
+          let
+            val {value} = cell worksheet cellRef
+          in
+            value
           end
   end
 

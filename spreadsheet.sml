@@ -126,13 +126,17 @@ structure SpreadSheet :> sig
     val toString : t -> string
   end
 
+  structure Formula : sig
+    type t
+  end
+
   structure CellValue : sig
     datatype t = Empty
                | Boolean of bool
                | Number of string
                | Error of string
                | String of RichString.t
-               | Formula of CT.CT_CellFormula
+               | Formula of Formula.t
 
     val toString : t -> string
     val toInt : t -> int
@@ -183,13 +187,17 @@ end = struct
     val toString = rstToString
   end
 
+  structure Formula = struct
+    type t = CT.CT_CellFormula
+  end
+
   structure CellValue = struct
     datatype t = Empty
                | Boolean of bool
                | Number of string
                | Error of string
                | String of RichString.t
-               | Formula of CT.CT_CellFormula
+               | Formula of Formula.t
 
     fun toString Empty = ""
       | toString (Boolean boolean) = Bool.toString boolean

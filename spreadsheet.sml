@@ -234,6 +234,31 @@ structure SpreadSheet = struct
             cells'
           end
 
+    fun makeCell (CT.CT_Cell {t, f, v, is, ...}, sharedStrings) =
+          case t of
+               ST_CellType.b =>
+                 let
+                   val v = Option.valOf v
+                   val boolean = Option.valOf (CT.toBool v)
+                 in
+                   { value = CellValue.Boolean boolean }
+                 end
+             | ST_CellType.n =>
+                 { value = CellValue.Number (Option.valOf v) }
+             | ST_CellType.e =>
+                 { value = CellValue.Error (Option.valOf v) }
+             | ST_CellType.s =>
+                 let
+                   val v = Option.valOf v
+                   val index = Option.valOf (Int.fromString v)
+                 in
+                   { value = CellValue.String (Vector.sub (sharedStrings, index)) }
+                 end
+             | ST_CellType.str =>
+                 { value = CellValue.Formula (Option.valOf f) }
+             | ST_CellType.inlineStr =>
+                 { value = CellValue.String (Option.valOf is) }
+
     fun cell {nav, worksheet, sharedStrings} cellRef =
           let
             val rowRef = LargeWord.fromInt (CellRef.row cellRef)
@@ -249,30 +274,7 @@ structure SpreadSheet = struct
                    in
                      case cell of
                           NONE => { value = CellValue.Empty }
-                        | SOME (_, CT.CT_Cell {t, f, v, is, ...}) =>
-                            case t of
-                                 ST_CellType.b =>
-                                   let
-                                     val v = Option.valOf v
-                                     val boolean = Option.valOf (CT.toBool v)
-                                   in
-                                     { value = CellValue.Boolean boolean }
-                                   end
-                               | ST_CellType.n =>
-                                   { value = CellValue.Number (Option.valOf v) }
-                               | ST_CellType.e =>
-                                   { value = CellValue.Error (Option.valOf v) }
-                               | ST_CellType.s =>
-                                   let
-                                     val v = Option.valOf v
-                                     val index = Option.valOf (Int.fromString v)
-                                   in
-                                     { value = CellValue.String (Vector.sub (sharedStrings, index)) }
-                                   end
-                               | ST_CellType.str =>
-                                   { value = CellValue.Formula (Option.valOf f) }
-                               | ST_CellType.inlineStr =>
-                                   { value = CellValue.String (Option.valOf is) }
+                        | SOME (_, c) => makeCell (c, sharedStrings)
                    end
           end
 

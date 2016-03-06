@@ -135,11 +135,6 @@ where type t = CT.CT_Rst
 end
 
 structure SpreadSheet = struct
-  val officeDocument = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
-  val sharedStrings = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"
-  val main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
-  val r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
-
   structure CellValue :> sig
     datatype t = Empty
                | Boolean of bool
@@ -321,11 +316,13 @@ structure SpreadSheet = struct
             val nav = ZipNavigator.ofPackage package
             open ZipNavigator
             infix |>
+            val officeDocument = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
             val officeDocument = nav |> typ officeDocument |> hd
                   handle Empty => raise Fail "main part not found"
             val bytes = getStream officeDocument
             val doc = UXML.Path.fromDocument (UXML.parseBytes bytes)
             val workbook = CT.workbook doc
+            val sharedStrings = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"
             val sharedStrings = officeDocument |> typ sharedStrings
                                                |> map getStream
                                                |> loadSharedStrings

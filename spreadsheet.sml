@@ -144,6 +144,7 @@ structure SpreadSheet = struct
                | Formula of CT.CT_CellFormula
 
     val toString : t -> string
+    val toInt : t -> int
   end = struct
     datatype t = Empty
                | Boolean of bool
@@ -158,6 +159,16 @@ structure SpreadSheet = struct
       | toString (Error error) = error
       | toString (String string) = RichString.toString string
       | toString (Formula (CT.CT_CellFormula {content, ...})) = content
+
+    fun toInt Empty = 0
+      | toInt (Boolean false) = 0
+      | toInt (Boolean true) = 1
+      | toInt (Number number) =
+          Option.getOpt (Int.fromString number, 0)
+      | toInt (Error _) = 0
+      | toInt (String string) =
+          Option.getOpt (Int.fromString (RichString.toString string), 0)
+      | toInt (Formula _) = 0
   end
 
   structure Cell :> sig

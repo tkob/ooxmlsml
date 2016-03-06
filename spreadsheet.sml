@@ -145,15 +145,20 @@ structure SpreadSheet :> sig
     val toString : t -> string
   end
 
+  structure SharedStrings : sig
+    type t
+    val sub : t * int -> RichString.t
+  end
+
   structure Worksheet : sig
     type t
-    val fromNav : ZipNavigator.navigator * CT.CT_Rst Vector.vector -> t
+    val fromNav : ZipNavigator.navigator * SharedStrings.t -> t
     val cell : t -> CellRef.t -> Cell.t
     val cellValue : t -> CellRef.t -> CellValue.t
   end
   where type t = { nav : ZipNavigator.navigator,
                    worksheet : CT.CT_Worksheet,
-                   sharedStrings : CT.CT_Rst Vector.vector }
+                   sharedStrings : SharedStrings.t }
 
   structure Workbook : sig
     type t
@@ -167,7 +172,7 @@ structure SpreadSheet :> sig
   where type t = { package : ZipPackage.package,
                    nav : ZipNavigator.navigator,
                    workbook : CT.CT_Workbook,
-                   sharedStrings : CT.CT_Rst Vector.vector }
+                   sharedStrings : SharedStrings.t }
 end = struct
   structure RichString = struct
     type t = CT.CT_Rst
@@ -211,11 +216,16 @@ end = struct
     fun toString {value} = CellValue.toString value
   end
 
+  structure SharedStrings = struct
+    type t = CT.CT_Rst Vector.vector
+    fun sub (sharedStrings, i) = Vector.sub (sharedStrings, i)
+  end
+
   structure Worksheet = struct
     type t = {
       nav : ZipNavigator.navigator,
       worksheet : CT.CT_Worksheet,
-      sharedStrings : CT.CT_Rst Vector.vector }
+      sharedStrings : SharedStrings.t }
 
     fun fromNav (nav, sharedStrings) : t =
           let
@@ -315,7 +325,7 @@ end = struct
       package : ZipPackage.package,
       nav : ZipNavigator.navigator,
       workbook : CT.CT_Workbook,
-      sharedStrings : CT.CT_Rst Vector.vector }
+      sharedStrings : SharedStrings.t }
 
     fun loadSharedStrings [] = Vector.fromList []
       | loadSharedStrings (bytes::_) =

@@ -46,3 +46,16 @@ val it = NONE : string option
 - f "A1 ";
 val it = NONE : string option
 ```
+
+# right
+
+```
+- Option.map (CellRef.toString o CellRef.down) (CellRef.fromString "A1");
+val it = SOME "A2" : string option
+
+# down
+
+```
+- Option.map (CellRef.toString o CellRef.right) (CellRef.fromString "A1");
+val it = SOME "B1" : string option
+```

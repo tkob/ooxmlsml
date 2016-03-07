@@ -54,6 +54,8 @@ structure CellRef :> sig
   eqtype t
   val column : t -> ColumnName.t
   val row : t -> int
+  val right : t -> t
+  val down : t -> t
   val toString : t -> string
   val fromString : string -> t option
 end = struct
@@ -61,6 +63,9 @@ end = struct
 
   fun column {column, row} = column
   fun row {column, row} = row
+
+  fun right {column, row} = {column = ColumnName.next column, row = row}
+  fun down {column, row} = {column = column, row = row + 1}
 
   fun toString {column, row} =
         ColumnName.toString column ^ Int.toString row

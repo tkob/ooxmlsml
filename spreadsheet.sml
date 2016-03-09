@@ -95,6 +95,8 @@ structure Ref :> sig
   val bottom : t -> int
   val left : t -> ColumnName.t
   val right : t -> ColumnName.t
+  val topLeft : t -> CellRef.t
+  val bottomRight : t -> CellRef.t
   val toString : t -> string
   val fromString : string -> t option
 end = struct
@@ -104,6 +106,9 @@ end = struct
   fun bottom (_, bottomRight) = CellRef.row bottomRight
   fun left (topLeft, _) = CellRef.column topLeft
   fun right (_, bottomRight) = CellRef.column bottomRight
+
+  fun topLeft (topLeft, _) = topLeft
+  fun bottomRight (_, bottomRight) = bottomRight
 
   fun toString (topLeft, rightBottom) =
         CellRef.toString topLeft ^ ":" ^ CellRef.toString rightBottom

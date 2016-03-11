@@ -5,6 +5,7 @@ structure ColumnName :> sig
   val toString : t -> string
   val fromString : string -> t option
   val next : t -> t
+  val < : t * t -> bool
 end = struct
   type t = int
 
@@ -48,6 +49,8 @@ end = struct
         end
 
   fun next v = v + 1
+
+  fun op < (l, r) = Int.< (l, r)
 end
 
 structure CellRef :> sig

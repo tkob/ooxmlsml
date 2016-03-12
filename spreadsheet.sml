@@ -102,6 +102,7 @@ structure Ref :> sig
   val right : t -> ColumnName.t
   val topLeft : t -> CellRef.t
   val bottomRight : t -> CellRef.t
+  val has : t * CellRef.t -> bool
   val toString : t -> string
   val fromString : string -> t option
 end = struct
@@ -114,6 +115,17 @@ end = struct
 
   fun topLeft (topLeft, _) = topLeft
   fun bottomRight (_, bottomRight) = bottomRight
+
+  fun has (r, cellRef) =
+        let
+          val cellRow = CellRef.row cellRef
+          val cellCol = CellRef.column cellRef
+        in
+                  top r   <= cellRow
+          andalso cellRow <= bottom r
+          andalso ColumnName.<= (left r, cellCol)
+          andalso ColumnName.<= (cellCol, right r)
+        end
 
   fun toString (topLeft, rightBottom) =
         CellRef.toString topLeft ^ ":" ^ CellRef.toString rightBottom

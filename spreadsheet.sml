@@ -313,7 +313,9 @@ end = struct
                    { value = CellValue.Boolean boolean }
                  end
              | ST_CellType.n =>
-                 { value = CellValue.Number (Option.valOf v) }
+                 (case v of
+                       SOME v => { value = CellValue.Number v }
+                     | NONE => { value = CellValue.Empty })
              | ST_CellType.e =>
                  { value = CellValue.Error (Option.valOf v) }
              | ST_CellType.s =>

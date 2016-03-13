@@ -183,9 +183,12 @@ structure SpreadSheet :> sig
 
   structure Worksheet : sig
     type t
+    type range
+
     val fromNav : ZipNavigator.navigator * SharedStrings.t -> t
     val cell : t -> CellRef.t -> Cell.t
     val cellValue : t -> CellRef.t -> CellValue.t
+    val range : t * Ref.t -> range
   end
   where type t = { nav : ZipNavigator.navigator,
                    worksheet : CT.CT_Worksheet,
@@ -261,6 +264,10 @@ end = struct
       nav : ZipNavigator.navigator,
       worksheet : CT.CT_Worksheet,
       sharedStrings : SharedStrings.t }
+
+    type range = { base : t, r : Ref.t }
+
+    fun range (base, r) = {base = base, r = r}
 
     fun fromNav (nav, sharedStrings) : t =
           let

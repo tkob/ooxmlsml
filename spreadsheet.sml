@@ -189,6 +189,7 @@ structure SpreadSheet :> sig
     val cell : t -> CellRef.t -> Cell.t
     val cellValue : t -> CellRef.t -> CellValue.t
     val range : t * Ref.t -> range
+    val app : (CellRef.t * CellValue.t -> unit) -> range -> unit
   end
   where type t = { nav : ZipNavigator.navigator,
                    worksheet : CT.CT_Worksheet,
@@ -361,6 +362,60 @@ end = struct
             val {value} = cell worksheet cellRef
           in
             value
+          end
+
+    fun app f {base = {nav, worksheet, sharedStrings}, r} =
+          let
+            val range = r
+            val topLeft = Ref.topLeft r
+            val bottom = Ref.bottom r
+            val right = Ref.right r
+            fun appCell (cellRef, _, []) = (
+                  f (cellRef, CellValue.Empty);
+                  if CellRef.column cellRef = right then ()
+                  else appCell (CellRef.right cellRef, cellRef, []))
+              | appCell (cellRef, prevCellRef, cells as (cell as CT.CT_Cell {r, ...})::cells') =
+                  let
+                    val thisCellRef =
+                      Option.getOpt (Option.mapPartial CellRef.fromString r, prevCellRef)
+                    val next = CellRef.right cellRef
+                  in
+                    if cellRef = thisCellRef then (
+                      f (cellRef, #value (makeCell (cell, sharedStrings)));
+                      if Ref.has (range, next) then
+                        appCell (next, next, cells')
+                      else ())
+                    else (
+                      f (cellRef, CellValue.Empty);
+                      if Ref.has (range, next) then
+                        appCell (next, prevCellRef, cells)
+                      else ())
+                  end
+            fun appRow (cellRef, _, []) = (
+                  appCell (cellRef, cellRef, []);
+                  if CellRef.row cellRef = bottom then ()
+                  else appRow (CellRef.down cellRef, CellRef.row cellRef, []))
+              | appRow (cellRef, prevRow, rows as CT.CT_Row {r, c, ...}::rows') =
+                  let
+                    val thisRow =
+                      Option.getOpt (Option.map LargeWord.toInt r, prevRow)
+                    val next = CellRef.down cellRef
+                  in
+                    if CellRef.row cellRef = thisRow then (
+                      appCell (cellRef, cellRef, c);
+                      if Ref.has (range, next) then
+                        appRow (next, CellRef.row next, rows')
+                      else ())
+                    else (
+                      appCell (cellRef, cellRef, []);
+                      if Ref.has (range, next) then
+                        appRow (next, prevRow, rows)
+                      else ())
+                  end
+            val CT.CT_Worksheet {sheetData = CT.CT_SheetData {row = rows, ...}, ...} =
+                  worksheet
+          in
+            appRow (topLeft, CellRef.row topLeft, rows)
           end
   end
 

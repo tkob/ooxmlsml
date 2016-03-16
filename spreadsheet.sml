@@ -189,6 +189,7 @@ structure SpreadSheet :> sig
     val cell : t -> CellRef.t -> Cell.t
     val cellValue : t -> CellRef.t -> CellValue.t
     val range : t * Ref.t -> range
+    val fullRange : t -> range
     val app : (CellRef.t * CellValue.t -> unit) -> range -> unit
   end
   where type t = { nav : ZipNavigator.navigator,
@@ -269,6 +270,12 @@ end = struct
     type range = { base : t, r : Ref.t }
 
     fun range (base, r) = {base = base, r = r}
+
+    fun fullRange (ws as {worksheet = CT.CT_Worksheet {dimension = SOME (CT.CT_SheetDimension {ref = r, ...}), ...}, ...} : t) =
+          (case Ref.fromString r of
+                NONE => raise Fail "invalid ref"
+              | SOME r => { base = ws, r = r })
+      | fullRange _ = raise Fail "dimension not found"
 
     fun fromNav (nav, sharedStrings) : t =
           let

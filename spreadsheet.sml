@@ -167,6 +167,7 @@ structure SpreadSheet :> sig
 
     val toString : t -> string
     val toInt : t -> int
+    val toBool : t -> bool
   end
 
   structure Cell : sig
@@ -247,6 +248,14 @@ end = struct
       | toInt (String string) =
           Option.getOpt (Int.fromString (RichString.toString string), 0)
       | toInt (Formula _) = 0
+
+    fun toBool Empty = false
+      | toBool (Boolean boolean) = boolean
+      | toBool (Number "0") = false
+      | toBool (Number _) = true
+      | toBool (Error _) = false
+      | toBool (String s) = RichString.toString s <> ""
+      | toBool (Formula _) = false
   end
 
   structure Cell = struct

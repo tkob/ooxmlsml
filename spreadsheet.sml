@@ -191,7 +191,8 @@ structure SpreadSheet :> sig
     val cellValue : t -> CellRef.t -> CellValue.t
     val range : t * Ref.t -> range
     val fullRange : t -> range
-    val app : (CellRef.t * CellValue.t -> unit) -> range -> unit
+    val appRange : (CellRef.t * CellValue.t -> unit) -> range -> unit
+    val app : (CellRef.t * CellValue.t -> unit) -> t -> unit
   end
   where type t = { nav : ZipNavigator.navigator,
                    worksheet : CT.CT_Worksheet,
@@ -380,7 +381,7 @@ end = struct
             value
           end
 
-    fun app f {base = {nav, worksheet, sharedStrings}, r} =
+    fun appRange f {base = {nav, worksheet, sharedStrings}, r} =
           let
             val range = r
             val topLeft = Ref.topLeft r
@@ -433,6 +434,7 @@ end = struct
           in
             appRow (topLeft, rows)
           end
+    fun app f ws = appRange f (fullRange ws)
   end
 
   structure Workbook = struct

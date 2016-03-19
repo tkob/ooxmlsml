@@ -1,4 +1,4 @@
-TESTS = t/rels.t t/Content_Types.t t/contenttype.t t/iri.t t/partname.t
+TESTS = t/rels.t t/Content_Types.t t/contenttype.t t/iri.t t/partname.t t/cellref.t t/columnname.t t/ref.t t/rels.t
 
 main: shared-commonSimpleTypes.sml sml.sml
 

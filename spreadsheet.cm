@@ -10,4 +10,6 @@ is
   opc.cm
   shared-commonSimpleTypes.sml
   sml.sml
+  spreadsheetref.sml
+  spreadsheet-sig.sml
   spreadsheet.sml

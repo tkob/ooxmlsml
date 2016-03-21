@@ -12,4 +12,5 @@ is
   $SMACKAGE/uxml/v0.1.0/uxml.cm
   $SMACKAGE/smlzip/v0.1.0/pkzip.cm
 
+  iri.cm
   opc.sml

@@ -10,12 +10,9 @@ structure IRI :> sig
 
   exception IRI
 
-  type rule
-
-  val iri : rule
-  val irelativeRef : rule
-  val iriReference : rule
-  val parse : rule -> string -> iri
+  val parseIri : string -> iri
+  val parseIrelativeRef : string -> iri
+  val parseIriReference : string -> iri
 
   val normalize : iri -> iri
   val resolve : {iri : iri, relativeTo : iri } -> iri
@@ -155,6 +152,10 @@ end where type segment = string = struct
           if Substring.isEmpty s' then iri
           else raise IRI
         end
+
+  fun parseIri s = parse iri s
+  fun parseIrelativeRef s = parse irelativeRef s
+  fun parseIriReference s = parse iriReference s
 
   fun merge ([], r) = ""::r
     | merge (base, r) = List.revAppend (tl (rev base), r)

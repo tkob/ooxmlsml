@@ -27,7 +27,7 @@ structure PartName = struct
           query = NONE,
           fragment = NONE }
 
-  fun fromString s = fromIRI (IRI.parse IRI.irelativeRef s)
+  fun fromString s = fromIRI (IRI.parseIrelativeRef s)
   fun toString segments = "/" ^ String.concatWith "/" segments
 end
 
@@ -163,8 +163,8 @@ structure Relationship = struct
                                         |> Option.map stringToTargetMode
                                         |> (fn x => Option.getOpt (x, Internal))
                   val parseURL = if targetMode = Internal
-                                 then IRI.parse IRI.irelativeRef
-                                 else IRI.parse IRI.iriReference
+                                 then IRI.parseIrelativeRef
+                                 else IRI.parseIriReference
                   val target = node |> getAttr "Target"
                                     |> Option.valOf
                                     |> parseURL
@@ -335,7 +335,7 @@ structure ZipPackage :> PACKAGE = struct
         let
           val baseIri = PartName.toIRI partName
           val relativeIri : IRI.iri =
-            IRI.parse IRI.irelativeRef ("_rels/" ^ List.last partName ^ ".rels")
+            IRI.parseIrelativeRef ("_rels/" ^ List.last partName ^ ".rels")
           val targetIri : IRI.iri =
             IRI.resolve {relativeTo = baseIri, iri = relativeIri}
         in
@@ -380,7 +380,7 @@ end = struct
                let
                  val baseName =
                    case pointer of
-                        Package _ => IRI.parse IRI.irelativeRef  "/"
+                        Package _ => IRI.parseIrelativeRef  "/"
                       | Part (iri, _) => iri
                  val partIRI =
                     IRI.resolve {iri = target, relativeTo = baseName}
@@ -397,7 +397,7 @@ end = struct
                 let
                   val baseName =
                     case pointer of
-                         Package _ => IRI.parse IRI.irelativeRef  "/"
+                         Package _ => IRI.parseIrelativeRef  "/"
                        | Part (iri, _) => iri
                   val partIRI =
                     IRI.resolve {iri = target, relativeTo = baseName}

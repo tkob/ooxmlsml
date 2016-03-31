@@ -13,4 +13,5 @@ is
   $SMACKAGE/smlzip/v0.1.0/pkzip.cm
 
   iri.cm
+  contenttype.cm
   opc.sml

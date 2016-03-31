@@ -1,7 +1,7 @@
 # Setup
 
 ```
-- CM.make "opc.cm";
+- CM.make "contenttype.cm";
 ...
 val it = true : bool
 ```

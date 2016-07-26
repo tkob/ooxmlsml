@@ -62,11 +62,28 @@ structure SpreadSheet :> SPREADSHEET = struct
     type t = CT.CT_Border
   end
 
+  structure StyleSheet = struct
+    type t = {
+      numFmts:      CT.CT_NumFmts       Vector.vector,
+      fonts:        CT.CT_Fonts         Vector.vector,
+      fills:        CT.CT_Fills         Vector.vector,
+      borders:      CT.CT_Border        Vector.vector,
+      cellStyleXfs: CT.CT_Xf            Vector.vector,
+      cellXfs:      CT.CT_Xf            Vector.vector,
+      cellStyles:   CT.CT_CellStyles    Vector.vector,
+      dxfs:         CT.CT_Dxfs          Vector.vector,
+      tableStyles:  CT.CT_TableStyles   Vector.vector,
+      colors:       CT.CT_Colors        Vector.vector,
+      extLst:       CT.CT_ExtensionList Vector.vector }
+    fun borders ({borders = borders, ...} : t) = borders
+  end
+
   structure Worksheet = struct
     type t = {
       nav : ZipNavigator.navigator,
       worksheet : CT.CT_Worksheet,
-      sharedStrings : SharedStrings.t }
+      sharedStrings : SharedStrings.t,
+      styles : StyleSheet.t }
 
     type range = { base : t, r : Ref.t }
 
@@ -78,7 +95,7 @@ structure SpreadSheet :> SPREADSHEET = struct
               | SOME r => { base = ws, r = r })
       | fullRange _ = raise Fail "dimension not found"
 
-    fun fromNav (nav, sharedStrings) : t =
+    fun fromNav (nav, sharedStrings, styles) : t =
           let
             val bytes = ZipNavigator.getStream nav
             val doc = UXML.Path.fromDocument (UXML.parseBytes bytes)
@@ -86,7 +103,8 @@ structure SpreadSheet :> SPREADSHEET = struct
           in
             { nav = nav,
               worksheet = worksheet,
-              sharedStrings = sharedStrings }
+              sharedStrings = sharedStrings,
+              styles = styles }
           end
 
     fun renumRows rows : (LargeWord.word * CT.CT_Row) list =
@@ -146,7 +164,7 @@ structure SpreadSheet :> SPREADSHEET = struct
              | ST_CellType.inlineStr =>
                  { value = CellValue.String (Option.valOf is) }
 
-    fun cell {nav, worksheet, sharedStrings} cellRef =
+    fun cell {nav, worksheet, sharedStrings, styles} cellRef =
           let
             val rowRef = LargeWord.fromInt (CellRef.row cellRef)
             val columnRef = CellRef.column cellRef
@@ -172,7 +190,7 @@ structure SpreadSheet :> SPREADSHEET = struct
             value
           end
 
-    fun appRange f {base = {nav, worksheet, sharedStrings}, r} =
+    fun appRange f {base = {nav, worksheet, sharedStrings, styles}, r} =
           let
             val range = r
             val topLeft = Ref.topLeft r
@@ -233,7 +251,8 @@ structure SpreadSheet :> SPREADSHEET = struct
       package : ZipPackage.package,
       nav : ZipNavigator.navigator,
       workbook : CT.CT_Workbook,
-      sharedStrings : SharedStrings.t }
+      sharedStrings : SharedStrings.t,
+      styles : StyleSheet.t }
 
     fun loadSharedStrings [] = Vector.fromList []
       | loadSharedStrings (bytes::_) =
@@ -242,6 +261,46 @@ structure SpreadSheet :> SPREADSHEET = struct
             val CT.CT_Sst {si, ...} = CT.sst doc
           in
             Vector.fromList si
+          end
+
+    fun mapStyle f NONE = Vector.fromList []
+      | mapStyle f (SOME x) = f x
+    fun loadStyles [] = { numFmts      = Vector.fromList [],
+                          fonts        = Vector.fromList [],
+                          fills        = Vector.fromList [],
+                          borders      = Vector.fromList [],
+                          cellStyleXfs = Vector.fromList [],
+                          cellXfs      = Vector.fromList [],
+                          cellStyles   = Vector.fromList [],
+                          dxfs         = Vector.fromList [],
+                          tableStyles  = Vector.fromList [],
+                          colors       = Vector.fromList [],
+                          extLst       = Vector.fromList [] }
+      | loadStyles (bytes::_) =
+          let
+            val doc = UXML.Path.fromDocument (UXML.parseBytes bytes)
+            val CT.CT_Stylesheet {
+                  numFmts, fonts, fills, borders, cellStyleXfs, cellXfs,
+                  cellStyles, dxfs, tableStyles, colors, extLst, ... } =
+                CT.styleSheet doc
+            val borders =
+              mapStyle (fn (CT.CT_Borders {border, ...}) => Vector.fromList border) borders
+            val cellStyleXfs =
+              mapStyle (fn (CT.CT_CellStyleXfs {xf, ...}) => Vector.fromList xf) cellStyleXfs
+            val cellXfs =
+              mapStyle (fn (CT.CT_CellXfs {xf, ...}) => Vector.fromList xf) cellXfs
+          in
+            { numFmts      = Vector.fromList [],
+              fonts        = Vector.fromList [],
+              fills        = Vector.fromList [],
+              borders      = borders,
+              cellStyleXfs = cellStyleXfs,
+              cellXfs      = cellXfs,
+              cellStyles   = Vector.fromList [],
+              dxfs         = Vector.fromList [],
+              tableStyles  = Vector.fromList [],
+              colors       = Vector.fromList [],
+              extLst       = Vector.fromList [] }
           end
 
     fun openIn fileName : t =
@@ -260,11 +319,16 @@ structure SpreadSheet :> SPREADSHEET = struct
             val sharedStrings = officeDocument |> typ sharedStrings
                                                |> map getStream
                                                |> loadSharedStrings
+            val styles = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"
+            val styles = officeDocument |> typ styles
+                                        |> map getStream
+                                        |> loadStyles
           in
             { package = package,
               nav = officeDocument,
               workbook = workbook,
-              sharedStrings = sharedStrings }
+              sharedStrings = sharedStrings,
+              styles = styles }
           end
 
     fun worksheetById (workbook : t) id' =
@@ -273,8 +337,9 @@ structure SpreadSheet :> SPREADSHEET = struct
             infix |>
             val nav = #nav workbook |> id id'
             val sharedStrings = #sharedStrings workbook
+            val styles = #styles workbook
           in
-            Worksheet.fromNav (nav, sharedStrings)
+            Worksheet.fromNav (nav, sharedStrings, styles)
           end
 
     fun worksheets (workbook : t) =

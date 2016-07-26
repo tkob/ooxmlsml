@@ -36,11 +36,17 @@ signature SPREADSHEET = sig
   structure Border : sig
     type t
   end
+
+  structure StyleSheet : sig
+    type t
+    val borders : t -> Border.t Vector.vector
+  end
+
   structure Worksheet : sig
     type t
     type range
 
-    val fromNav : ZipNavigator.navigator * SharedStrings.t -> t
+    val fromNav : ZipNavigator.navigator * SharedStrings.t * StyleSheet.t -> t
     val cell : t -> CellRef.t -> Cell.t
     val cellValue : t -> CellRef.t -> CellValue.t
     val range : t * Ref.t -> range
@@ -50,7 +56,8 @@ signature SPREADSHEET = sig
   end
   where type t = { nav : ZipNavigator.navigator,
                    worksheet : CT.CT_Worksheet,
-                   sharedStrings : SharedStrings.t }
+                   sharedStrings : SharedStrings.t,
+                   styles : StyleSheet.t }
 
   structure Workbook : sig
     type t
@@ -64,5 +71,6 @@ signature SPREADSHEET = sig
   where type t = { package : ZipPackage.package,
                    nav : ZipNavigator.navigator,
                    workbook : CT.CT_Workbook,
-                   sharedStrings : SharedStrings.t }
+                   sharedStrings : SharedStrings.t,
+                   styles : StyleSheet.t }
 end

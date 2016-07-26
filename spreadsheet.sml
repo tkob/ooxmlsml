@@ -58,6 +58,10 @@ structure SpreadSheet :> SPREADSHEET = struct
     fun sub (sharedStrings, i) = Vector.sub (sharedStrings, i)
   end
 
+  structure Border = struct
+    type t = CT.CT_Border
+  end
+
   structure Worksheet = struct
     type t = {
       nav : ZipNavigator.navigator,

@@ -33,6 +33,9 @@ signature SPREADSHEET = sig
     val sub : t * int -> RichString.t
   end
 
+  structure Border : sig
+    type t
+  end
   structure Worksheet : sig
     type t
     type range
